@@ -1,5 +1,4 @@
 from setuptools import setup
-from masonite.info import VERSION
 
 setup(
     name='masonite',
