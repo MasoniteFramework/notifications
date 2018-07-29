@@ -1,3 +1,5 @@
+from notifications.exceptions import InvalidNotificationType
+
 class MailComponent:
     template = ''
     _driver = None
