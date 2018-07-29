@@ -83,9 +83,8 @@ class SlackComponent:
             "text": text,
             # "name": options.get('name', 'button'),
             "style": options.get('style', 'primary'),
-            "url": url,
-            **additional,
-        }
+            "url": url
+        }.update(additional)
 
         if not self._attachments:
             self._attachments.append(
@@ -108,7 +107,8 @@ class SlackComponent:
 
     def thumbnail(self, location): pass
 
-    def dont_link(self) -> bool: pass
+    def dont_link(self): 
+        pass
 
     def find_channel(self, name):
         if self._run:
