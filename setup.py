@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='masonite',
+    name='masonite-notifications',
     packages=[
         'notifications',
         'notifications.components',
