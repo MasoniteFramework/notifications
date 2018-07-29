@@ -6,6 +6,8 @@ setup(
         'notifications',
         'notifications.components',
         'notifications.snippets',
+        'notifications.providers',
+        'notifications.commands',
     ],
     version='0.0.2',
     install_requires=[],
