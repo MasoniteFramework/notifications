@@ -8,7 +8,7 @@ setup(
         'notifications.components',
         'notifications.snippets',
     ],
-    version='0.0.1',
+    version='0.0.2',
     install_requires=[],
     description='The core for the Masonite framework',
     author='Joseph Mancuso',
