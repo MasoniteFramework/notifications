@@ -15,7 +15,6 @@ class Notify:
     def __getattr__(self, name):
         self.called_notifications = []
         def method(*notifications, **options):
-
             for obj in notifications:
                 notification = obj(self.app)
                 self.called_notifications.append(notification)

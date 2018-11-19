@@ -52,11 +52,7 @@ class MailComponent:
     def fire_mail(self, MailConfig):
         driver = MailConfig.DRIVER if not self._driver else None
 
-        notification = self.app.resolve(self.mail)
-        if not notification:
-            raise InvalidNotificationType(
-                'The notification cannot be of type: {}. Make sure you have a return statement in your notification.'.format(type(notification)))
-        if notification._run:
+        if self._run:
             self.app.make('Mail') \
                 .driver(driver) \
                 .to(self._to) \
