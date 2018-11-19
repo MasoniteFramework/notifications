@@ -1,5 +1,5 @@
 from notifications.exceptions import InvalidNotificationType
-
+from config import mail
 class MailComponent:
     template = ''
     _driver = None
@@ -49,8 +49,8 @@ class MailComponent:
     def mail(self):
         raise Exception('The {} notification does not have a mail method'.format(self))
 
-    def fire_mail(self, MailConfig):
-        driver = MailConfig.DRIVER if not self._driver else None
+    def fire_mail(self):
+        driver = mail.DRIVER if not self._driver else None
 
         if self._run:
             self.app.make('Mail') \

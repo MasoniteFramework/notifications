@@ -2,14 +2,15 @@ from notifications.exceptions import InvalidNotificationType
 import requests
 import json
 import os
+from masonite.app import App
 
 
 class Notify:
 
     called_notifications = []
 
-    def __init__(self, Container):
-        self.app = Container
+    def __init__(self, container: App):
+        self.app = container
         self.mail_config = self.app.make('MailConfig')
 
     def __getattr__(self, name):

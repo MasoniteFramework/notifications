@@ -4,6 +4,7 @@ from masonite.view import View
 from masonite.drivers.MailSmtpDriver import MailSmtpDriver
 from masonite.drivers.MailMailgunDriver import MailMailgunDriver
 from masonite.managers.MailManager import MailManager
+from masonite import Mail
 
 
 class WelcomeNotification(Notifiable):
@@ -52,6 +53,7 @@ class TestNotifiable:
 
     def setup_method(self):
         self.app = App()
+        self.app.bind('Container', self.app)
         self.app.bind('ViewClass', View(self.app))
         # self.app.make('ViewClass').add_environment('notifications/snippets')
         self.app.bind('View', View(self.app).render)
