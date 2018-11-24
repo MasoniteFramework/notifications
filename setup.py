@@ -9,7 +9,7 @@ setup(
         'notifications.providers',
         'notifications.commands',
     ],
-    version='0.0.5',
+    version='1.0.0',
     install_requires=[],
     description='The core for the Masonite framework',
     author='Joseph Mancuso',
