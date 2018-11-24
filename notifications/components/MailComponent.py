@@ -1,5 +1,7 @@
 from notifications.exceptions import InvalidNotificationType
 from config import mail
+
+
 class MailComponent:
     template = ''
     _driver = None
@@ -12,12 +14,12 @@ class MailComponent:
 
     def line(self, message):
         self.template += self._view('/notifications/snippets/mail/line',
-                                   {'message': message}).rendered_template
+                                    {'message': message}).rendered_template
         return self
 
     def action(self, message, href=None, style='success'):
         self.template += self._view('/notifications/snippets/mail/action',
-                                   {'message': message, 'style': style, 'href': href}).rendered_template
+                                    {'message': message, 'style': style, 'href': href}).rendered_template
         return self
 
     def view(self, template, dictionary={}):
@@ -26,12 +28,12 @@ class MailComponent:
 
     def panel(self, message):
         self.template += self._view('/notifications/snippets/mail/panel',
-                                   {'message': message}).rendered_template
+                                    {'message': message}).rendered_template
         return self
 
     def heading(self, message):
         self.template += self._view('/notifications/snippets/mail/heading',
-                                   {'message': message}).rendered_template
+                                    {'message': message}).rendered_template
         return self
 
     def subject(self, message):
@@ -47,7 +49,8 @@ class MailComponent:
         return self
 
     def mail(self):
-        raise Exception('The {} notification does not have a mail method'.format(self))
+        raise Exception(
+            'The {} notification does not have a mail method'.format(self))
 
     def fire_mail(self):
         driver = mail.DRIVER if not self._driver else None

@@ -3,6 +3,7 @@ from masonite.provider import ServiceProvider
 from notifications import Notify
 from notifications.commands import NotificationCommand
 
+
 class NotificationProvider(ServiceProvider):
 
     wsgi = False

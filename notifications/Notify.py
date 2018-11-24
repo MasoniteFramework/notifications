@@ -15,6 +15,7 @@ class Notify:
 
     def __getattr__(self, name):
         self.called_notifications = []
+
         def method(*notifications, **options):
             for obj in notifications:
                 notification = obj(self.app)
@@ -23,7 +24,7 @@ class Notify:
                 # Set all keyword arguments as protected members
                 for key, value in options.items():
                     setattr(notification, '_{}'.format(key), value)
-                
+
                 # Call the method on the notifcation class
                 self.app.resolve(
                     getattr(notification, name)
@@ -33,5 +34,5 @@ class Notify:
                 notification = self.app.resolve(
                     getattr(notification, 'fire_{}'.format(name))
                 )
-                
+
         return method

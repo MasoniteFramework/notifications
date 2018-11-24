@@ -2,6 +2,7 @@ import requests
 import json
 from notifications.exceptions import SlackChannelNotFound
 
+
 class SlackComponent:
 
     app = None
@@ -90,7 +91,7 @@ class SlackComponent:
             self._attachments.append(
                 {
                     "fallback": "Your device is not able to view button links.",
-                    'actions':[
+                    'actions': [
                         data
                     ]
                 }
@@ -98,7 +99,7 @@ class SlackComponent:
         else:
             self._attachments[0]['actions'].append(data)
         return self
-    
+
     def dry(self):
         self._run = False
         return self
@@ -107,7 +108,7 @@ class SlackComponent:
 
     def thumbnail(self, location): pass
 
-    def dont_link(self): 
+    def dont_link(self):
         pass
 
     def find_channel(self, name):
@@ -118,8 +119,9 @@ class SlackComponent:
             for channel in response.json()['channels']:
                 if channel['name'] == name.split('#')[1]:
                     return channel['id']
-            
-            raise SlackChannelNotFound('Could not find the {} channel'.format(name))
+
+            raise SlackChannelNotFound(
+                'Could not find the {} channel'.format(name))
         else:
             return 'TEST_ID'
 

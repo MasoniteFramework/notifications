@@ -16,13 +16,15 @@ class NotificationCommand(Command):
         if not os.path.isfile('app/notifications/{0}.py'.format(notification)):
             if not os.path.exists(os.path.dirname('app/notifications/{0}.py'.format(notification))):
                 # Create the path to the notification if it does not exist
-                os.makedirs(os.path.dirname('app/notifications/{0}.py'.format(notification)))
+                os.makedirs(os.path.dirname(
+                    'app/notifications/{0}.py'.format(notification)))
 
             f = open('app/notifications/{0}.py'.format(notification), 'w+')
 
             f.write("''' A {0} Notification '''\n".format(notification))
             f.write('from notifications import Notifiable\n\n')
-            f.write("class {0}(Notifiable):\n\n    def mail(self):\n        pass\n".format(notification))
+            f.write("class {0}(Notifiable):\n\n    def mail(self):\n        pass\n".format(
+                notification))
 
             self.info('Notification Created Successfully!')
         else:
