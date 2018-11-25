@@ -10,7 +10,6 @@ class NotificationProvider(ServiceProvider):
 
     def register(self):
         self.app.bind('Notify', Notify(self.app))
-        self.app.swap(Notify, Notify(self.app))
         self.app.bind('NotificationCommand', NotificationCommand())
 
     def boot(self):
