@@ -1,5 +1,7 @@
 from notifications.exceptions import InvalidNotificationType
 from config import mail
+from masonite.queues import ShouldQueue
+from masonite import Queue
 
 
 class MailComponent:
@@ -54,10 +56,16 @@ class MailComponent:
 
     def fire_mail(self):
         driver = mail.DRIVER if not self._driver else None
-
         if self._run:
-            self.app.make('Mail') \
-                .driver(driver) \
-                .to(self._to) \
-                .subject(self._subject) \
-                .send(self.template)
+            if isinstance(self, ShouldQueue):
+                self.app.make(Queue).push(self.app.make('Mail')
+                                          .driver(driver)
+                                          .to(self._to)
+                                          .subject(self._subject)
+                                          .send, args=(self.template,))
+            else:
+                self.app.make('Mail') \
+                    .driver(driver) \
+                    .to(self._to) \
+                    .subject(self._subject) \
+                    .send(self.template)
