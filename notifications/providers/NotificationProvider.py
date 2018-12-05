@@ -1,4 +1,5 @@
-''' A NotificationProvider Service Provider '''
+""" A NotificationProvider Service Provider """
+
 from masonite.provider import ServiceProvider
 from notifications import Notify
 from notifications.commands import NotificationCommand

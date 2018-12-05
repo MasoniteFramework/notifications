@@ -1,8 +1,11 @@
-from notifications.exceptions import InvalidNotificationType
-import requests
+"""Notify Class."""
+
 import json
 import os
+
+import requests
 from masonite.app import App
+from notifications.exceptions import InvalidNotificationType
 
 
 class Notify:
@@ -10,10 +13,25 @@ class Notify:
     called_notifications = []
 
     def __init__(self, container: App):
+        """Notify constructor.
+        
+        Arguments:
+            container {masonite.app.App} -- Masonite app container.
+        """
         self.app = container
-        self.mail_config = self.app.make('MailConfig')
 
     def __getattr__(self, name):
+        """Special method that will be used to call the same method on the notifiable class.
+
+        For example when Notify(SomeNotifiable).mail() it will call the mail method on the 
+        notifiable class.
+        
+        Arguments:
+            name {string} -- The method to call on the notifiable class.
+        
+        Returns:
+            None
+        """
         self.called_notifications = []
 
         def method(*notifications, **options):
