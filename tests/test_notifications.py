@@ -132,3 +132,8 @@ class TestNotifiable:
     def test_mail_notification_should_queue(self):
         assert self.notify.mail(ShouldQueueWelcomeNotification,
                                 to='test@email.com') is None
+
+    def test_can_send_with_via_method(self):
+        notifications = self.notify.via('mail').send(
+            ShouldQueueWelcomeNotification, to="test@email.com").called_notifications
+        assert isinstance(notifications[0], ShouldQueueWelcomeNotification)
