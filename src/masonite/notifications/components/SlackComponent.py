@@ -204,17 +204,17 @@ class SlackComponent:
         self._run = False
         return self
 
-    def attach(self, file): 
+    def attach(self, file):
         pass
 
-    def thumbnail(self, location): 
+    def thumbnail(self, location):
         pass
 
     def dont_link(self):
         pass
 
     def find_channel(self, name):
-        """Calls the Slack API to find the channel name. 
+        """Calls the Slack API to find the channel name.
 
         This is so we do not have to specify the channel ID's. Slack requires channel ID's
         to be used.

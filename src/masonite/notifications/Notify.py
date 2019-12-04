@@ -5,6 +5,7 @@ import os
 
 import requests
 from masonite.app import App
+
 from .exceptions import InvalidNotificationType
 
 
@@ -23,7 +24,7 @@ class Notify:
     def __getattr__(self, name):
         """Special method that will be used to call the same method on the notifiable class.
 
-        For example when Notify(SomeNotifiable).mail() it will call the mail method on the 
+        For example when Notify(SomeNotifiable).mail() it will call the mail method on the
         notifiable class.
 
         Arguments:
