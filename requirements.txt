@@ -1,2 +1,2 @@
 masonite==2.3.0b2
-pytest
+pytest 
