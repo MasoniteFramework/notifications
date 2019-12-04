@@ -20,7 +20,7 @@ jobs:
         make init
     - name: Test with pytest
       env:
-        DB_CONNECTION: ${ secrets.DB_CONNECTION }
+        DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
       run: |
         make test
   lint:
