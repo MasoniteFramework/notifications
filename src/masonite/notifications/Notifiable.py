@@ -1,6 +1,6 @@
 """Notifiable Class."""
 
-from notifications.components import MailComponent, SlackComponent
+from .components import MailComponent, SlackComponent
 
 
 class Notifiable(MailComponent, SlackComponent):

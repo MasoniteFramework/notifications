@@ -1,8 +1,8 @@
 """Mail Component Class."""
 
-from masonite import Queue
+from masonite import Queue, Mail
 from masonite.queues import ShouldQueue
-from notifications.exceptions import InvalidNotificationType
+from ..exceptions import InvalidNotificationType
 
 from config import mail
 
@@ -11,6 +11,7 @@ class MailComponent:
     template = ''
     _driver = None
     _run = True
+    template_prefix = '/masonite/notifications'
 
     def __init__(self, app):
         """Mail Component Constructor.
@@ -31,7 +32,7 @@ class MailComponent:
         Returns:
             self
         """
-        self.template += self._view('/notifications/snippets/mail/line',
+        self.template += self._view(self.template_prefix + '/snippets/mail/line',
                                     {'message': message}).rendered_template
         return self
 
@@ -48,7 +49,7 @@ class MailComponent:
         Returns:
             self
         """
-        self.template += self._view('/notifications/snippets/mail/action',
+        self.template += self._view(self.template_prefix + '/snippets/mail/action',
                                     {'message': message, 'style': style, 'href': href}).rendered_template
         return self
 
@@ -76,7 +77,7 @@ class MailComponent:
         Returns:
             self
         """
-        self.template += self._view('/notifications/snippets/mail/panel',
+        self.template += self._view(self.template_prefix + '/snippets/mail/panel',
                                     {'message': message}).rendered_template
         return self
 
@@ -89,7 +90,7 @@ class MailComponent:
         Returns:
             self
         """
-        self.template += self._view('/notifications/snippets/mail/heading',
+        self.template += self._view(self.template_prefix + '/snippets/mail/heading',
                                     {'message': message}).rendered_template
         return self
 

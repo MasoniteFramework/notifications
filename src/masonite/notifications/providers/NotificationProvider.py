@@ -1,8 +1,8 @@
 """ A NotificationProvider Service Provider """
 
 from masonite.provider import ServiceProvider
-from notifications import Notify
-from notifications.commands import NotificationCommand
+from .. import Notify
+from ..commands import NotificationCommand
 
 
 class NotificationProvider(ServiceProvider):

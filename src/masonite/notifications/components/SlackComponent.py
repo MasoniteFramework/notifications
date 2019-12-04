@@ -3,7 +3,7 @@
 import json
 
 import requests
-from notifications.exceptions import SlackChannelNotFound
+from ..exceptions import SlackChannelNotFound
 
 
 class SlackComponent:

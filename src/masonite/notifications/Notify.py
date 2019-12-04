@@ -5,7 +5,7 @@ import os
 
 import requests
 from masonite.app import App
-from notifications.exceptions import InvalidNotificationType
+from .exceptions import InvalidNotificationType
 
 
 class Notify:

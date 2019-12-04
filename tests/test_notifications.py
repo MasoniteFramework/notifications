@@ -6,13 +6,15 @@ from masonite.managers import QueueManager
 from masonite.managers.MailManager import MailManager
 from masonite.queues import Queueable, ShouldQueue
 from masonite.view import View
-from notifications import Notifiable, Notify
+from src.masonite.notifications import Notifiable, Notify
+from masonite.testing import TestCase
 
 from config import queue
 
 
 class WelcomeNotification(Notifiable):
 
+    template_prefix = '/src/masonite/notifications'
     def mail(self):
         return self.subject('New account signup!') \
             .driver('terminal') \
@@ -22,7 +24,7 @@ class WelcomeNotification(Notifiable):
             .line('Attached is an invoice for your recent purchase') \
             .action('Sign Back In', href="http://gbaleague.com") \
             .line('See you soon! Game on!') \
-            .view('/notifications/snippets/mail/heading',
+            .view('/src/masonite/notifications/snippets/mail/heading',
                   {'message': 'Welcome To The GBA!'}) \
             .dry()
 
@@ -38,9 +40,9 @@ class WelcomeNotification(Notifiable):
 
 
 class ShouldQueueWelcomeNotification(ShouldQueue, Notifiable):
+    template_prefix = '/src/masonite/notifications'
 
     def mail(self):
-        print('mail')
         return self.subject('New account signup!') \
             .driver('terminal') \
             .panel('GBALeague.com') \
@@ -49,7 +51,7 @@ class ShouldQueueWelcomeNotification(ShouldQueue, Notifiable):
             .line('Attached is an invoice for your recent purchase') \
             .action('Sign Back In', href="http://gbaleague.com") \
             .line('See you soon! Game on!') \
-            .view('/notifications/snippets/mail/heading',
+            .view('/src/masonite/notifications/snippets/mail/heading',
                   {'message': 'Welcome To The GBA!'}) \
 
 
@@ -82,30 +84,32 @@ class MockMailConfig:
     }
 
 
-class TestNotifiable:
+class TestNotifiable(TestCase):
 
-    def setup_method(self):
-        self.app = App()
-        self.app.bind('Container', self.app)
-        self.app.bind('ViewClass', View(self.app))
-        # self.app.make('ViewClass').add_environment('notifications/snippets')
-        self.app.bind('View', View(self.app).render)
-        self.app.bind('MailConfig', MockMailConfig)
-        self.app.bind('MailTerminalDriver', MailTerminalDriver)
-        self.app.bind('MailMailgunDriver', MailMailgunDriver)
-        self.app.bind('MailManager', MailManager(self.app))
-        self.app.bind('Mail', self.app.make(
-            'MailManager').driver(MockMailConfig.DRIVER))
+    def setUp(self):
+        super().setUp()
 
-        # Setup and test Queueing
-        self.app.bind('QueueAsyncDriver', QueueAsyncDriver)
-        self.app.bind('QueueConfig', queue)
-        self.app.bind('Container', self.app)
-        self.app.bind('QueueManager', QueueManager(self.app))
-        self.app.swap(Queue, self.app.make('QueueManager').driver('async'))
+        # self.app = App()
+        # self.app.bind('Container', self.app)
+        # self.app.bind('ViewClass', View(self.app))
+        # # self.app.make('ViewClass').add_environment('notifications/snippets')
+        # self.app.bind('View', View(self.app).render)
+        # self.app.bind('MailConfig', MockMailConfig)
+        # self.app.bind('MailTerminalDriver', MailTerminalDriver)
+        # self.app.bind('MailMailgunDriver', MailMailgunDriver)
+        # self.app.bind('MailManager', MailManager(self.app))
+        # self.app.bind('Mail', self.app.make(
+        #     'MailManager').driver(MockMailConfig.DRIVER))
+
+        # # Setup and test Queueing
+        # self.app.bind('QueueAsyncDriver', QueueAsyncDriver)
+        # self.app.bind('QueueConfig', queue)
+        # self.app.bind('Container', self.app)
+        # self.app.bind('QueueManager', QueueManager(self.app))
+        # self.app.swap(Queue, self.app.make('QueueManager').driver('async'))
         
         self.notification = WelcomeNotification
-        self.notify = Notify(self.app)
+        self.notify = Notify(self.container)
 
     def test_notification_sends_mail(self):
         assert self.notify.mail(WelcomeNotification,
