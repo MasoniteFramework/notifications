@@ -6,3 +6,5 @@ venv
 masonite_notifications.*
 dist/
 .vscode
+.env
+package.db
