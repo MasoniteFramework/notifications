@@ -1,7 +1,7 @@
 init:
-  cp .env-example .env
-  pip install --upgrade pip
-  pip install .
+	cp .env-example .env
+	pip install --upgrade pip
+	pip install .
 	pip install -r requirements.txt
 	pip install pytest
 test:
@@ -11,6 +11,8 @@ ci:
 	make lint
 lint:
 	python -m flake8 src/masonite/notifications/ --ignore=E501,F401,E128,E402,E731,F821,E712,W503
+format:
+	black src/masonite/notifications
 deepsource:
 	curl https://deepsource.io/cli | sh
 	./bin/deepsource report --analyzer test-coverage --key python --value-file ./coverage.xml
