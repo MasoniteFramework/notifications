@@ -1,6 +1,6 @@
 name: Test Application
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -19,8 +19,6 @@ jobs:
       run: |
         make init
     - name: Test with pytest
-      env:
-        DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
       run: |
         make test
   lint:

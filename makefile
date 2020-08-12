@@ -1,7 +1,9 @@
 init:
-	pip install masonite_cli --user
-	pip install -r requirements.txt --user
-	pip install -e . --user
+  cp .env-example .env
+  pip install --upgrade pip
+  pip install .
+	pip install -r requirements.txt
+	pip install pytest
 test:
 	python -m pytest tests
 ci:
