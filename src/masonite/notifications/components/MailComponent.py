@@ -1,25 +1,18 @@
 """Mail Component Class."""
 
-from masonite import Queue, Mail
-from masonite.queues import ShouldQueue
-from ..exceptions import InvalidNotificationType
-
-from config import mail
-
 
 class MailComponent:
     template = ''
-    _driver = None
-    _run = True
-    template_prefix = '/masonite/notifications'
+    template_prefix = '/src/masonite/notifications'
 
-    def __init__(self, app):
+    def __init__(self):
         """Mail Component Constructor.
 
         Arguments:
             app {masonite.app.App} -- The Masonite container object.
         """
-        self.app = app
+        from wsgi import container
+        self.app = container
         self._view = self.app.make('View')
         self._subject = None
 
@@ -105,51 +98,3 @@ class MailComponent:
         """
         self._subject = message
         return self
-
-    def dry(self):
-        """Sets whether the email should be sent or not.
-
-        Returns:
-            self
-        """
-        self._run = False
-        return self
-
-    def driver(self, driver):
-        """Specifies the driver to use.
-
-        Arguments:
-            driver {string} -- The name of the driver.
-
-        Returns:
-            self
-        """
-        self._driver = driver
-        return self
-
-    def mail(self):
-        """Used to show a not implemented type exception.
-
-        Raises:
-            Exception
-        """
-        raise Exception(
-            'The {} notification does not have a mail method'.format(self))
-
-    def fire_mail(self):
-        """Used to fire the actual email and run the logic for sending emails.
-        """
-        driver = mail.DRIVER if not self._driver else None
-        if self._run:
-            if isinstance(self, ShouldQueue):
-                self.app.make(Queue).push(self.app.make('Mail')
-                                          .driver(driver)
-                                          .to(self._to)
-                                          .subject(self._subject)
-                                          .send, args=(self.template,))
-            else:
-                self.app.make('Mail') \
-                    .driver(driver) \
-                    .to(self._to) \
-                    .subject(self._subject) \
-                    .send(self.template)

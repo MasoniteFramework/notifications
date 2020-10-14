@@ -1,1 +1,1 @@
-from .NotificationCommand import NotificationCommand
+from .NewCommand import NewNotificationCommand

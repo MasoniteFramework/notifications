@@ -6,6 +6,7 @@ setup(
     packages=[
         'masonite.notifications',
         'masonite.notifications.components',
+        'masonite.notifications.drivers',
         'masonite.notifications.snippets',
         'masonite.notifications.providers',
         'masonite.notifications.commands',
