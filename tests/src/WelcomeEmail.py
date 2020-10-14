@@ -26,6 +26,9 @@ class WelcomeNotification(Notifiable):
             .as_markdown() \
             .no_reply() \
 
+    def broadcast(self, driver=None):
+        self.channel("users") \
+            .message("A new user registered !")
 
 Notify.mail(
     WelcomeNotification,

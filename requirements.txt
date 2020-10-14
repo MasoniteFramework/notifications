@@ -1,2 +1,5 @@
-masonite==2.3.0b2.post1
+masonite<3.0
+# for testing only
 pytest
+pusher
+ably
