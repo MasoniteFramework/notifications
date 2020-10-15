@@ -13,7 +13,7 @@ class AnonymousNotifiable(Notifiable):
     def route(self, channel, route):
         """Add routing information to the target."""
         if channel == "database":
-            return ValueError("The database channel does not support on-demand notifications.")
+            raise ValueError("The database channel does not support on-demand notifications.")
         self._routes[channel] = route
         return self
 
@@ -22,7 +22,3 @@ class AnonymousNotifiable(Notifiable):
             return self._routes[channel]
         except KeyError:
             raise ValueError("Routing has not been defined for the channel {}".format(channel))
-
-    # def notify(self, notification):
-    #     """Send the given notification."""
-    #     return self.se

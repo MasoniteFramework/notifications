@@ -79,9 +79,6 @@ class TestBroadcastNotifications(TestCase):
         user = self.user()
         user.notify(WelcomeNotification())
 
-    def test_broadcast_to_anonymous_user(self):
-        pass
-
     def test_broadcast_driver_channels_are_set(self):
         User.receives_broadcast_notifications_on = lambda self: "channel_1"
         user = self.user()
@@ -114,3 +111,8 @@ class TestBroadcastNotifications(TestCase):
             user.notify(WelcomeNotification())
         self.assertEqual("Notification model should implement to_broadcast() method.",
                          str(err.exception))
+
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_sending_to_anonymous(self, mock_stderr):
+        WelcomeNotification.to_broadcast = lambda self, notifiable: {"message": "hello"}
+        self.notification.route("broadcast", "users").notify(WelcomeNotification())

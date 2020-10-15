@@ -165,3 +165,8 @@ class TestDatabaseNotifications(TestCase):
             "notifiable_type": "users"
         })
         self.assertEqual(1, user.unread_notifications().count())
+
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_sending_to_anonymous_not_possible(self, mock_stderr):
+        with self.assertRaises(ValueError):
+            self.notification.route("database", "test@mail.com").notify(WelcomeNotification())

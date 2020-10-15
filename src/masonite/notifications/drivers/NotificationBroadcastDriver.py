@@ -46,11 +46,15 @@ class NotificationBroadcastDriver(BaseDriver, NotificationContract):
         """Get the channels the notification should be broadcasted on."""
         channels = notification.broadcast_on()
         if not channels:
-            try:
-                channels = notifiable.receives_broadcast_notifications_on()
-            except:
-                raise NotImplementedError("""No broadcast channels defined for the Notification.
-                receives_broadcast_notifications_on() should be defined on the Notifiable.""")
+            from ..AnonymousNotifiable import AnonymousNotifiable
+            if isinstance(notifiable, AnonymousNotifiable):
+                channels = notifiable.route_notification_for("broadcast", notification)
+            else:
+                try:
+                    channels = notifiable.receives_broadcast_notifications_on()
+                except:
+                    raise NotImplementedError("""No broadcast channels defined for the Notification.
+                    receives_broadcast_notifications_on() should be defined on the Notifiable.""")
 
         if isinstance(channels, str):
             channels = [channels]

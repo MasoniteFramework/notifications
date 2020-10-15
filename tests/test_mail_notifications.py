@@ -56,6 +56,7 @@ class TestMailNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
+        self.notification = Notify(self.container)
         # reset objects to default between tests
         WelcomeNotification.to_mail = to_mail
 
@@ -202,3 +203,9 @@ class TestMailNotifications(TestCase):
         self.assertIn("Welcome To My Application", printed_email)
         self.assertIn("user@example.com", printed_email)
         self.assertIn("Welcome Joe", printed_email)
+
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_sending_to_anonymous(self, mock_stderr):
+        self.notification.route("mail", "test@mail.com").notify(CustomNotification())
+        self.assertIn('To: test@mail.com', mock_stderr.getvalue())
+        self.assertIn('Welcome!', mock_stderr.getvalue())

@@ -1,8 +1,14 @@
 from masonite.testing import TestCase
 
-from app.User import User
-from src.masonite.notifications import Notify, Notification
+from config.database import Model
+from src.masonite.notifications import Notify, Notification, Notifiable
 from src.masonite.notifications.components import MailComponent
+
+
+class User(Model, Notifiable):
+    """User Model"""
+
+    __fillable__ = ['name', 'email', 'password']
 
 
 class WelcomeNotification(Notification):
@@ -28,4 +34,4 @@ class UserTestCase(TestCase):
         })
 
     def user(self):
-        return User.find(1)
+        return User.all()[-1]
