@@ -25,7 +25,7 @@ class Notify(object):
         """Send the given notification to the given notifiables."""
         if isinstance(notification, ShouldQueue):
             self.queue_notification(notifiables, notification)
-        self.send_now(notifiables, notification)
+        return self.send_now(notifiables, notification)
 
     def send_now(self, notifiables, notification, channels=[]):
         """Send the given notification to the given notifiables immediately."""

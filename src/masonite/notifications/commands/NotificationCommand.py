@@ -1,8 +1,8 @@
-"""New Notification Command."""
+"""Notification Command."""
 from masonite.commands import BaseScaffoldCommand
 
 
-class NewNotificationCommand(BaseScaffoldCommand):
+class NotificationCommand(BaseScaffoldCommand):
     """
     Creates a new Notification class.
 

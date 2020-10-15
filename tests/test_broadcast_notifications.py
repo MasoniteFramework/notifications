@@ -15,10 +15,12 @@ class User(Model, Notifiable):
 
     __fillable__ = ['name', 'email', 'password']
 
+
 def to_broadcast(self, notifiable):
     return {
         "data": "Welcome {0}!".format(notifiable.name)
     }
+
 
 class WelcomeNotification(Notification):
 
@@ -53,7 +55,7 @@ class TestBroadcastNotifications(TestCase):
         })
 
     def user(self):
-        return User.find(1)
+        return User.all()[-1]
 
     def test_sending_notification_to_user(self):
         def broadcast_on(self):

@@ -1,4 +1,5 @@
 """Notifiable mixin"""
+from orator.orm import morph_many
 from .Notify import Notify
 
 
@@ -7,12 +8,12 @@ class Notifiable(object):
     def notify(self, notification):
         """Send the given notification."""
         from wsgi import container
-        Notify(container).send(self, notification)
+        return Notify(container).send(self, notification)
 
     def notify_now(self, notification, channels=[]):
         """Send the given notification immediately."""
         from wsgi import container
-        Notify(container).send_now(self, notification, channels)
+        return Notify(container).send_now(self, notification, channels)
 
     def route_notification_for(self, channel, notification=None):
         """Get the notification routing information for the given channel."""
@@ -32,16 +33,28 @@ class Notifiable(object):
             else:
                 raise NotImplementedError("Notifiable model does not implement {}".format(method_name))
 
+    # TODO: this does not work it returns empty
+    # @morph_many('notifiable')
+    # def notifications(self):
+    #     """Get the entity's notifications. Only for 'database'
+    #     notifications."""
+    #     from .models import DatabaseNotification
+    #     return DatabaseNotification
+
     def notifications(self):
-        """Get the entity's notifications."""
-        return []
+        """Get the entity's notifications. Only for 'database'
+        notifications."""
+        from .models import DatabaseNotification
+        return DatabaseNotification.where("notifiable_id", self.id).order_by("created_at").get()
 
     def unread_notifications(self):
-        """Get the entity's unread notifications."""
-        # TODO: self.notifications().where('read_at', '!=', None)
-        return []
+        """Get the entity's unread notifications. Only for 'database'
+        notifications."""
+        return self.notifications().where('read_at', None)
 
     def read_notifications(self):
-        """Get the entity's read notifications."""
-        # TODO: self.notifications().where('read_at', None)
-        return []
+        """Get the entity's read notifications. Only for 'database'
+        notifications."""
+        from .models import DatabaseNotification
+        return DatabaseNotification.where("notifiable_id", self.id) \
+            .where('read_at', '!=', None).order_by("created_at").get()

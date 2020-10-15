@@ -10,6 +10,7 @@ setup(
         'masonite.notifications.snippets',
         'masonite.notifications.providers',
         'masonite.notifications.commands',
+        'masonite.notifications.models',
     ],
     version='2.0.0',
     install_requires=[],

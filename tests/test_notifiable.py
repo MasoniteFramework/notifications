@@ -47,7 +47,7 @@ class TestNotifiable(TestCase):
         })
 
     def user(self):
-        return User.find(1)
+        return User.where("name", "Joe").get()[0]
 
     def test_user_as_notifiable_entity(self):
         user = self.user()

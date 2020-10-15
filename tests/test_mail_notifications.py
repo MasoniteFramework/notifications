@@ -67,7 +67,7 @@ class TestMailNotifications(TestCase):
         })
 
     def user(self):
-        return User.find(1)
+        return User.where("name", "Joe").get()[0]
 
     def test_notification_should_implements_to_mail(self):
         del WelcomeNotification.to_mail
@@ -196,7 +196,7 @@ class TestMailNotifications(TestCase):
 
     @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
     def test_sending_with_mailable(self, mock_stderr):
-        user = User.find(1)
+        user = self.user()
         user.notify(WelcomeNotification())
         printed_email = mock_stderr.getvalue()
         self.assertIn("Welcome To My Application", printed_email)
