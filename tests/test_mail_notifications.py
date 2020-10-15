@@ -29,10 +29,14 @@ class WelcomeEmail(Mailable):
         )
 
 
+def to_mail(self, notifiable):
+    return WelcomeEmail(notifiable.name).to(notifiable.email)
+
+
 class WelcomeNotification(Notification):
 
     def to_mail(self, notifiable):
-        return WelcomeEmail(notifiable.name).to(notifiable.email)
+        return to_mail(self, notifiable)
 
     def via(self, notifiable):
         return ["mail"]
@@ -50,6 +54,11 @@ class CustomNotification(Notification):
 
 class TestMailNotifications(TestCase):
 
+    def setUp(self):
+        super().setUp()
+        # reset objects to default between tests
+        WelcomeNotification.to_mail = to_mail
+
     def setUpFactories(self):
         User.create({
             'name': 'Joe',
@@ -59,6 +68,14 @@ class TestMailNotifications(TestCase):
 
     def user(self):
         return User.find(1)
+
+    def test_notification_should_implements_to_mail(self):
+        del WelcomeNotification.to_mail
+        user = self.user()
+        with self.assertRaises(NotImplementedError) as err:
+            user.notify(WelcomeNotification())
+        self.assertEqual("Notification model should implement to_mail() method.",
+                         str(err.exception))
 
     def test_to_mail_subject(self):
         message = MailComponent().subject('Welcome!')

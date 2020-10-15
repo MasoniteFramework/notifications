@@ -14,7 +14,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
     _driver = None
 
     def __init__(self, app: App):
-        """Mail Component Constructor.
+        """Mail Driver Constructor.
 
         Arguments:
             app {masonite.app.App} -- The Masonite container object.
@@ -25,7 +25,8 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
     def send(self, notifiable, notification):
         """Used to send the email and run the logic for sending emails."""
         # build email
-        message = notification.to_mail(notifiable)
+        data = self.get_data("mail", notifiable, notification)
+
         recipients = self.get_recipients(notifiable, notification)
         # if isinstance(self, ShouldQueue):
         #     self.app.make(Queue).push(self.app.make('Mail')
@@ -34,23 +35,22 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
         #                               .subject(self._subject)
         #                               .send, args=(self.template,))
 
-        # message can be a MailComponent or a Mailable
+        # data can be a MailComponent or a Mailable
         driver_instance = self.get_mail_driver()
-        if isinstance(message, Mailable):
+        if isinstance(data, Mailable):
             return driver_instance \
-                .mailable(message) \
+                .mailable(data) \
                 .to(recipients) \
                 .send()
         else:
-            mail = driver_instance.to(recipients).subject(message._subject)
-
-            reply_to_recipients = self.get_reply_to_recipients(message._reply_to)
+            mail = driver_instance.to(recipients).subject(data._subject)
+            reply_to_recipients = self.get_reply_to_recipients(data._reply_to)
             if reply_to_recipients:
                 mail = mail.reply_to(reply_to_recipients)
-            if message._from:
-                mail = mail.send_from(self._format_address(message._from))
+            if data._from:
+                mail = mail.send_from(self._format_address(data._from))
 
-            return mail.send(message.template)
+            return mail.send(data.template)
 
     def get_mail_driver(self):
         """Shortcut method to get given mail driver instance."""

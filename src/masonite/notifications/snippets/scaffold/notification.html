@@ -1,13 +1,14 @@
 """A {{ class }} Notification class."""
 
-from masonite.notifications import Notification
+from masonite.notifications import Notification,
+from masonite.notifications.components import MailComponent,
 
 
 class {{ class }}(Notification):
     """{{ class }} Notification."""
 
     def to_mail(self, notifiable):
-        return self.subject('New email subject') \
+        return MailComponent().subject('New email subject') \
             .heading('This is a new email !') \
 
     def to_database(self, notifiable):

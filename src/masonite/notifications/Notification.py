@@ -30,3 +30,10 @@ class Notification(ABC):
         """
         self._run = False
         return self
+
+    @property
+    def notification_type(self):
+        """Get notification type defined with class name."""
+        # TODO: the idea is to get the inherited class, e.g. WelcomeNotification
+        # and not Notification
+        return self.__name__

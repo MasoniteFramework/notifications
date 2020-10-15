@@ -12,5 +12,5 @@ class NewNotificationCommand(BaseScaffoldCommand):
 
     scaffold_name = "Notification"
     base_directory = "app/notifications/"
-    template = "/masonite/notifications/stubs/notification"
+    template = "/masonite/notifications/snippets/scaffold/notification"
     postfix = "Notification"
