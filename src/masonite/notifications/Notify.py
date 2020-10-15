@@ -1,12 +1,10 @@
 """Notify handler class"""
-import json
-import os
-import requests
 import uuid
 from masonite.app import App
 from masonite.queues import ShouldQueue
+from config.database import Model
 
-from .exceptions import InvalidNotificationType
+# from .exceptions import InvalidNotificationType
 
 
 class Notify(object):
@@ -58,11 +56,19 @@ class Notify(object):
         pass
 
     def prepare_notifiables(self, notifiables):
-        if not isinstance(notifiables, list):
+        from .AnonymousNotifiable import AnonymousNotifiable
+        if isinstance(notifiables, Model) or isinstance(notifiables, AnonymousNotifiable):
             return [notifiables]
         else:
+            # could be a list or a Collection
             return notifiables
 
+    def route(self, channel, route):
+        """Begin sending a notification to an anonymous notifiable."""
+        from .AnonymousNotifiable import AnonymousNotifiable
+        return AnonymousNotifiable().route(channel, route)
+
+    # ---- OLD CODE below
     def __getattr__(self, name):
         """Special method that will be used to call the same method on the notifiable class.
 

@@ -1,11 +1,13 @@
 """Mail Component Class."""
+from .BaseComponent import BaseComponent
 
 
-class MailComponent:
+class MailComponent(BaseComponent):
     template = ''
     template_prefix = '/src/masonite/notifications'
 
     def __init__(self):
+        super().__init__()
         """Mail Component Constructor.
 
         Arguments:
@@ -15,6 +17,8 @@ class MailComponent:
         self.app = container
         self._view = self.app.make('View')
         self._subject = None
+        self._from = ""
+        self._reply_to = ""
 
     def line(self, message):
         """Writes a line to a template.
@@ -29,7 +33,7 @@ class MailComponent:
                                     {'message': message}).rendered_template
         return self
 
-    def action(self, message, href=None, style='success'):
+    def action(self, message, href=None, style=None):
         """Shows an action button.
 
         Arguments:
@@ -42,6 +46,8 @@ class MailComponent:
         Returns:
             self
         """
+        if not style:
+            style = self.level()
         self.template += self._view(self.template_prefix + '/snippets/mail/action',
                                     {'message': message, 'style': style, 'href': href}).rendered_template
         return self
@@ -97,4 +103,21 @@ class MailComponent:
             self
         """
         self._subject = message
+        return self
+
+    def send_from(self, address, name=None):
+        if name:
+            self._from = (address, name)
+        else:
+            self._from = address
+        return self
+
+    def reply_to(self, addresses, name=None):
+        if isinstance(addresses, str):
+            if name:
+                self._reply_to = (addresses, name)
+            else:
+                self._reply_to = addresses
+        else:
+            self._reply_to = addresses
         return self

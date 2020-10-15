@@ -12,7 +12,7 @@ class NotificationProvider(ServiceProvider):
     wsgi = False
 
     def register(self):
-        self.app.bind('Notify', Notify(self.app))
+        self.app.bind('Notification', Notify(self.app))
         self.app.bind('NotificationMailDriver', NotificationMailDriver)
         self.app.bind('NotificationManager', NotificationManager(self.app))
 

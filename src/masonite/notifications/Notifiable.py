@@ -21,15 +21,16 @@ class Notifiable(object):
 
         try:
             method = getattr(self, method_name)
-            return method(notification)
+            return method(self)
         except AttributeError:
+            # if no method is defined on notifiable use default
             if channel == "database":
                 # TODO: check how to handle this later
                 pass
             elif channel == "mail":
                 return self.email
             else:
-                raise Exception("Notifiable model does not implement {}".format(method_name))
+                raise NotImplementedError("Notifiable model does not implement {}".format(method_name))
 
     def notifications(self):
         """Get the entity's notifications."""
