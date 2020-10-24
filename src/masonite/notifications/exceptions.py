@@ -33,3 +33,11 @@ class SlackInvalidWorkspace(SlackDriverException):
 
 class SlackInvalidMessage(SlackDriverException):
     pass
+
+
+# Nexmo driver exceptions
+class NexmoDriverException(Exception):
+    pass
+
+class NexmoInvalidMessage(NexmoDriverException):
+    pass

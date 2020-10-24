@@ -6,11 +6,13 @@ class VonageComponent(BaseComponent):
 
     _from = ""
     _text = ""
-    _type = None
-    _types = ["text", "binary", "wappush", "unicode", "vcal", "vcard"]
+    _client_ref = ""
+    _type = "text"
 
     def send_from(self, number):
-        """Numbers are specified in E.164 format."""
+        """Set the name or number the message should be sent from. Numbers should
+        be specified in E.164 format. Details can be found here:
+        https://developer.nexmo.com/messaging/sms/guides/custom-sender-id"""
         self._from = number
         return self
 
@@ -18,11 +20,16 @@ class VonageComponent(BaseComponent):
         self._text = text
         return self
 
-    def sms_type(self, type_key):
-        """Choose between text, binary, wappush, unicode, vcal or vcard."""
-        if type_key not in self._type:
-            raise ValueError("SMS type is incorrect. Should be equal to one of: {0}".format(",".join(self._types)))
-        self._type = type_key
+    def set_unicode(self):
+        """Set message as unicode to handle unicode characters in text."""
+        self._type = "unicode"
+        return self
+
+    def client_ref(self, client_ref):
+        """Set your own client reference (up to 40 characters)."""
+        if len(client_ref) > 40:
+            raise ValueError("client_ref should have less then 40 characters.")
+        self._client_ref = client_ref
         return self
 
     def as_dict(self):
@@ -32,4 +39,6 @@ class VonageComponent(BaseComponent):
         }
         if self._type:
             base_dict.update({"type": self._type})
+        if self._client_ref:
+            base_dict.update({"client-ref": self._type})
         return base_dict
