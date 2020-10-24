@@ -8,3 +8,5 @@ dist/
 .vscode
 .env
 package.db
+.coverage
+coverage.xml
