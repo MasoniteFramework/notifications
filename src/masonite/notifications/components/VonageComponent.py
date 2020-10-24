@@ -5,7 +5,6 @@ from .BaseComponent import BaseComponent
 class VonageComponent(BaseComponent):
 
     _from = ""
-    _to = ""
     _text = ""
     _type = None
     _types = ["text", "binary", "wappush", "unicode", "vcal", "vcard"]
@@ -13,11 +12,6 @@ class VonageComponent(BaseComponent):
     def send_from(self, number):
         """Numbers are specified in E.164 format."""
         self._from = number
-        return self
-
-    def to(self, number):
-        """Numbers are specified in E.164 format."""
-        self._to = number
         return self
 
     def text(self, text):
@@ -34,7 +28,6 @@ class VonageComponent(BaseComponent):
     def as_dict(self):
         base_dict = {
             "from": self._from,
-            "to": self._to,
             "text": self._text,
         }
         if self._type:
