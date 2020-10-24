@@ -7,7 +7,8 @@ from masonite.managers import BroadcastManager
 
 from .UserTestCase import UserTestCase
 from src.masonite.notifications import Notification
-from src.masonite.notifications.components import MailComponent, SlackComponent
+from src.masonite.notifications.components import MailComponent, SlackComponent, \
+    VonageComponent
 
 
 webhook_url = "https://hooks.slack.com/services/X/Y"
@@ -114,11 +115,14 @@ class TestNotifyHandler(UserTestCase):
             def to_slack(self, notifiable):
                 return SlackComponent().text("Welcome")
 
+            def to_vonage(self, notifiable):
+                return VonageComponent().text("Welcome")
+
             def broadcast_on(self):
                 return "all"
 
             def via(self, notifiable):
-                return ["mail", "broadcast", "database", "slack"]
+                return ["mail", "broadcast", "database", "slack", "vonage"]
 
         user = self.user()
         user.route_notification_for_slack = lambda n: webhook_url
@@ -130,3 +134,5 @@ class TestNotifyHandler(UserTestCase):
         # check slack driver
         self.assertTrue(responses.assert_call_count(webhook_url, 1))
         # TODO: check broadcast driver ? how
+
+        # TODO: check vonage driver
