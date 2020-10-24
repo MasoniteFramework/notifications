@@ -1,4 +1,4 @@
-"""Database Component Class."""
+"""Database driver Class."""
 import json
 from masonite.app import App
 from masonite import Queue, Broadcast

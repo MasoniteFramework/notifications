@@ -1,4 +1,4 @@
-"""Mail notification channel."""
+"""Mail driver Class."""
 
 from masonite import Queue, Mail
 from masonite.queues import ShouldQueue

@@ -1,4 +1,4 @@
-"""Slack Component."""
+"""Slack driver Class"""
 import json
 import requests
 from masonite.app import App

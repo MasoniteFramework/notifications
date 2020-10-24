@@ -1,4 +1,4 @@
-"""Broadcast Component Class."""
+"""Broadcast driver Class."""
 from masonite.app import App
 from masonite import Queue, Broadcast
 from masonite.helpers import config
