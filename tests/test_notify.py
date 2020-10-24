@@ -1,12 +1,16 @@
 import io
 import unittest
 import unittest.mock
+import responses
 from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
 from .UserTestCase import UserTestCase
 from src.masonite.notifications import Notification
-from src.masonite.notifications.components.MailComponent import MailComponent
+from src.masonite.notifications.components import MailComponent, SlackComponent
+
+
+webhook_url = "https://hooks.slack.com/services/X/Y"
 
 
 class WelcomeNotification(Notification):
@@ -48,7 +52,7 @@ class TestNotifyHandler(UserTestCase):
         # TODO: check Slack notification sent ?
 
     @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
-    def test_sending_dry_notification_does_not_send(self, mock_stderr):
+    def test_sending_dry_notification_on_notification_class(self, mock_stderr):
         class WelcomeNotification(Notification):
 
             def to_mail(self, notifiable):
@@ -62,7 +66,40 @@ class TestNotifyHandler(UserTestCase):
         self.assertEqual("", mock_stderr.getvalue())
 
     @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_sending_dry_notification_on_notification_interface(self, mock_stderr):
+        user = self.user()
+        self.notification.send(user, WelcomeNotification("sam"), dry=True)
+        self.assertEqual('', mock_stderr.getvalue())
+
+    def test_sending_notification_failing_silently_on_notification_class(self):
+        class WelcomeNotification(Notification):
+
+            def to_mail(self, notifiable):
+                raise Exception("Mock exception when sending")
+
+            def via(self, notifiable):
+                return ["mail"]
+
+        user = self.user()
+        user.notify(WelcomeNotification().fail_silently())
+        # no exception raised
+
+    def test_sending_fail_silently_notification_on_notification_interface(self):
+        class FailingNotification(Notification):
+
+            def to_mail(self, notifiable):
+                return Exception("Mock test error")
+
+            def via(self, notifiable):
+                return ["mail"]
+        user = self.user()
+        self.notification.send(user, FailingNotification(), fail_silently=True)
+        # no exception raised
+
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @responses.activate
     def test_notifications_with_multiple_channels_in_via(self, mock_stderr):
+        responses.add(responses.POST, webhook_url, body=b'ok')
         class WelcomeNotification(Notification):
 
             def to_mail(self, notifiable):
@@ -74,13 +111,22 @@ class TestNotifyHandler(UserTestCase):
             def to_database(self, notifiable):
                 return {"message": "Welcome"}
 
+            def to_slack(self, notifiable):
+                return SlackComponent().text("Welcome")
+
             def broadcast_on(self):
                 return "all"
 
             def via(self, notifiable):
-                return ["mail", "broadcast", "database"]
+                return ["mail", "broadcast", "database", "slack"]
 
         user = self.user()
-        user.notify(WelcomeNotification())
+        user.route_notification_for_slack = lambda n: webhook_url
+        user.notify(WelcomeNotification(), fail_silently=True)
+        # check email driver
         self.assertIn("Welcome", mock_stderr.getvalue())
+        # check database driver
         self.assertEqual(1, user.notifications().count())
+        # check slack driver
+        self.assertTrue(responses.assert_call_count(webhook_url, 1))
+        # TODO: check broadcast driver ? how

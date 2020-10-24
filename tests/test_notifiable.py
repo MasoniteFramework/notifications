@@ -79,6 +79,29 @@ class TestNotifiable(TestCase):
         self.assertIn('user@example.com', printed_email)
         self.assertIn('john@example.com', printed_email)
 
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_dry_on_notifiable_notify_method(self, mock_stderr):
+        user = self.user()
+        user.notify(WelcomeNotification(), dry=True)
+        printed_email = mock_stderr.getvalue()
+        # no email sent
+        self.assertEqual('', printed_email)
+
+    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    def test_fail_silently_on_notifiable_notify_method(self, mock_stderr):
+        class FailingNotification(Notification):
+
+            def to_mail(self, notifiable):
+                raise Exception("Mock exception when sending")
+
+            def via(self, notifiable):
+                return ["mail"]
+        user = self.user()
+        user.notify(FailingNotification(), fail_silently=True)
+        printed_email = mock_stderr.getvalue()
+        # no email sent
+        self.assertEqual('', printed_email)
+
     def test_notification_mail_default_routing(self):
         user = self.user()
         # default

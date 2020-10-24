@@ -8,6 +8,7 @@ class Notification(ABC):
     def __init__(self, *args, **kwargs):
         self.id = None
         self._run = True
+        self._fail_silently = False
 
     def broadcast_on(self):
         """Get the channels the event should broadcast on."""
@@ -22,6 +23,10 @@ class Notification(ABC):
     def should_send(self):
         return self._run
 
+    @property
+    def ignore_errors(self):
+        return self._fail_silently
+
     def dry(self):
         """Sets whether the notification should be sent or not.
 
@@ -29,6 +34,15 @@ class Notification(ABC):
             self
         """
         self._run = False
+        return self
+
+    def fail_silently(self):
+        """Sets whether the notification can fail silently (without raising exceptions).
+
+        Returns:
+            self
+        """
+        self._fail_silently = True
         return self
 
     @classmethod

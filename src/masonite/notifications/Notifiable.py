@@ -5,15 +5,15 @@ from .Notify import Notify
 
 class Notifiable(object):
 
-    def notify(self, notification, channels=[]):
+    def notify(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification."""
         from wsgi import container
-        return Notify(container).send(self, notification, channels=[])
+        return Notify(container).send(self, notification, channels=[], dry=dry, fail_silently=fail_silently)
 
-    def notify_now(self, notification, channels=[]):
+    def notify_now(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification immediately."""
         from wsgi import container
-        return Notify(container).send_now(self, notification, channels)
+        return Notify(container).send_now(self, notification, channels, dry, fail_silently)
 
     def route_notification_for(self, channel, notification=None):
         """Get the notification routing information for the given channel."""

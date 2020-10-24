@@ -22,13 +22,13 @@ class Notify(object):
         """
         self.app = container
 
-    def send(self, notifiables, notification, channels=[]):
+    def send(self, notifiables, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification to the given notifiables."""
         if isinstance(notification, ShouldQueue):
             self.queue_notification(notifiables, notification)
-        return self.send_now(notifiables, notification)
+        return self.send_now(notifiables, notification, dry=dry, fail_silently=fail_silently)
 
-    def send_now(self, notifiables, notification, channels=[]):
+    def send_now(self, notifiables, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification to the given notifiables immediately."""
         notifiables = self.prepare_notifiables(notifiables)
         for notifiable in notifiables:
@@ -42,15 +42,23 @@ class Notify(object):
                 if isinstance(notifiable, AnonymousNotifiable) and channel == "database":
                     continue
                 notification_id = uuid.uuid4()
-                self.send_to_notifiable(notifiable, notification, notification_id, channel)
+                self.send_to_notifiable(notifiable, notification, notification_id, channel, dry=dry, fail_silently=fail_silently)
 
-    def send_to_notifiable(self, notifiable, notification, notification_id, channel):
+    def send_to_notifiable(self, notifiable, notification, notification_id, channel, dry=False, fail_silently=False):
         """Send the given notification through the given channel to one notifiable."""
         if not notification.id:
             notification.id = notification_id
-        if not notification.should_send:
+        if not notification.should_send or dry:
             return
-        self.app.make("NotificationManager").driver(channel).send(notifiable, notification)
+        try:
+            self.app.make("NotificationManager").driver(channel).send(notifiable, notification)
+        # TODO: should we subclass exception which can occur during sending with NotificationSendingException ?
+        # could allow to catch only those ones
+        except Exception as e:
+            if notification.ignore_errors or fail_silently:
+                pass
+            else:
+                raise e
 
         # TODO: dispatch send event
 
