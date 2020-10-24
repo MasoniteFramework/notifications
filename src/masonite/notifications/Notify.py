@@ -2,6 +2,7 @@
 import uuid
 from masonite.app import App
 from masonite.queues import ShouldQueue
+from masonite.drivers import BaseDriver
 from config.database import Model
 
 # from .exceptions import InvalidNotificationType
@@ -21,7 +22,7 @@ class Notify(object):
         """
         self.app = container
 
-    def send(self, notifiables, notification):
+    def send(self, notifiables, notification, channels=[]):
         """Send the given notification to the given notifiables."""
         if isinstance(notification, ShouldQueue):
             self.queue_notification(notifiables, notification)
@@ -34,6 +35,8 @@ class Notify(object):
             # get channels for this notification
             legacy_channels = notification.via(notifiable)
             _channels = legacy_channels if legacy_channels else channels
+            # TODO: prepare channels check only strings or channel driver class
+            _channels = self.prepare_channels(_channels)
             for channel in _channels:
                 from .AnonymousNotifiable import AnonymousNotifiable
                 if isinstance(notifiable, AnonymousNotifiable) and channel == "database":
@@ -62,6 +65,22 @@ class Notify(object):
         else:
             # could be a list or a Collection
             return notifiables
+
+    def prepare_channels(self, channels):
+        """Process channels list to get a list of channels name. The list can
+        indeed contain channels class."""
+        _channels = []
+        for channel in channels:
+            if isinstance(channel, str):
+                _channels.append(channel)
+            # check base driver class else discard OR raise exception ?
+            elif issubclass(channel, BaseDriver):
+                # get channel name
+                name = channel.replace("Driver", "").lower()
+                # TODO: from this name can we import driver if not registered in IOC ? No !
+                # We should instead get an import path ..
+                _channels.append(name)
+        return _channels
 
     def route(self, channel, route):
         """Begin sending a notification to an anonymous notifiable."""

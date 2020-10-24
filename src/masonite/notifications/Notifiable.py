@@ -5,10 +5,10 @@ from .Notify import Notify
 
 class Notifiable(object):
 
-    def notify(self, notification):
+    def notify(self, notification, channels=[]):
         """Send the given notification."""
         from wsgi import container
-        return Notify(container).send(self, notification)
+        return Notify(container).send(self, notification, channels=[])
 
     def notify_now(self, notification, channels=[]):
         """Send the given notification immediately."""
