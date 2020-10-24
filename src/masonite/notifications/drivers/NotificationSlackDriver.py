@@ -1,12 +1,14 @@
 """Slack Component."""
-
 import json
-
 import requests
+from masonite.app import App
+from masonite.drivers import BaseDriver
+
 from ..exceptions import SlackChannelNotFound
+from ..NotificationContract import NotificationContract
 
 
-class SlackComponent:
+class NotificationSlackDriver(BaseDriver, NotificationContract):
 
     app = None
     _text = ''
@@ -25,6 +27,14 @@ class SlackComponent:
     _attach = ''
     _dont_link = True
     _as_markdown = False
+
+    def __init__(self, app: App):
+        """Slack Driver Constructor.
+
+        Arguments:
+            app {masonite.app.App} -- The Masonite container object.
+        """
+        self.app = app
 
     def text(self, message):
         """Specifies the text to be sent in the message.

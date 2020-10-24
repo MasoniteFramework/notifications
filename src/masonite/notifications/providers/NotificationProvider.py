@@ -2,7 +2,8 @@
 
 from masonite.provider import ServiceProvider
 from .. import Notify
-from ..drivers import NotificationMailDriver, NotificationBroadcastDriver, NotificationDatabaseDriver
+from ..drivers import NotificationMailDriver, NotificationBroadcastDriver, \
+NotificationDatabaseDriver, NotificationSlackDriver
 from ..NotificationManager import NotificationManager
 from ..commands import NotificationCommand, NotificationTableCommand
 
@@ -19,4 +20,5 @@ class NotificationProvider(ServiceProvider):
         self.app.bind('NotificationMailDriver', NotificationMailDriver)
         self.app.bind('NotificationBroadcastDriver', NotificationBroadcastDriver)
         self.app.bind('NotificationDatabaseDriver', NotificationDatabaseDriver)
+        self.app.bind('NotificationSlackDriver', NotificationSlackDriver)
         self.app.bind('NotificationManager', NotificationManager(self.app))

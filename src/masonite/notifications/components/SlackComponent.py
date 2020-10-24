@@ -1,12 +1,12 @@
-"""Slack Component."""
-
+"""Slack Component Class"""
 import json
-
 import requests
+from .BaseComponent import BaseComponent
+
 from ..exceptions import SlackChannelNotFound
 
 
-class SlackComponent:
+class SlackComponent(BaseComponent):
 
     app = None
     _text = ''
