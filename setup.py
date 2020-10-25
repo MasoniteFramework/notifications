@@ -18,7 +18,7 @@ setup(
     ],
     version='3.0.0',
     install_requires=[
-        "git+https://github.com/MasoniteFramework/masonite.git@3.0",
+        "masonite==3.0.1b0",
     ],
     description='Masonite Notifications Package',
     long_description=long_description,
