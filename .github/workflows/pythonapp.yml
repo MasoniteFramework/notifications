@@ -19,6 +19,8 @@ jobs:
       run: |
         make init
     - name: Test with pytest
+      env:
+        MAIL_DRIVER: terminal
       run: |
         make test
   lint:
