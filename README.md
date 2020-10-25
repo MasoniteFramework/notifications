@@ -19,9 +19,9 @@
 
 ## Introduction
 
-This is the official `notifications` package for Masonite allowing to quickly add notifications feature in
+This is the official notifications package for Masonite allowing to quickly add notifications feature in
 your application. Notifications can be sent accross `mail`, `slack`, `broadcast`, `database` and `vonage` (SMS)
-channels.
+channels by default.
 
 ## Official Documentation
 
