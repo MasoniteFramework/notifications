@@ -57,4 +57,4 @@ class Notifiable(object):
         notifications."""
         from .models import DatabaseNotification
         return DatabaseNotification.where("notifiable_id", self.id) \
-            .where('read_at', '!=', None).order_by("created_at").get()
+            .where('read_at', '!=', "").order_by("created_at").get()

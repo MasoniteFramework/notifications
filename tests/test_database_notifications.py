@@ -158,7 +158,6 @@ class TestDatabaseNotifications(TestCase):
         self.assertEqual(0, user.unread_notifications().count())
         DatabaseNotification.create({
             "id": str(uuid.uuid4()),
-            "read_at": None,
             "type": "test",
             "data": "{}",
             "notifiable_id": user.id,
