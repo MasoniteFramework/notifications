@@ -1,9 +1,12 @@
 """Notify handler class"""
 import uuid
 from masonite.app import App
+from masonite.exceptions import DriverNotFound
 from masonite.queues import ShouldQueue
-from masonite.drivers import BaseDriver
 from config.database import Model
+
+from .NotificationContract import NotificationContract
+from .exceptions import InvalidNotificationType
 
 
 class Notify(object):
@@ -39,7 +42,6 @@ class Notify(object):
             # get channels for this notification
             legacy_channels = notification.via(notifiable)
             _channels = legacy_channels if legacy_channels else channels
-            # TODO: prepare channels check only strings or channel driver class
             _channels = self.prepare_channels(_channels)
             for channel in _channels:
                 from .AnonymousNotifiable import AnonymousNotifiable
@@ -59,12 +61,15 @@ class Notify(object):
                     fail_silently=fail_silently,
                 )
 
+    def is_custom_channel(self, channel):
+        return issubclass(channel, NotificationContract)
+
     def send_to_notifiable(
         self,
         notifiable,
         notification,
         notification_id,
-        channel,
+        channel_instance,
         dry=False,
         fail_silently=False,
     ):
@@ -74,11 +79,7 @@ class Notify(object):
         if not notification.should_send or dry:
             return
         try:
-            self.app.make("NotificationManager").driver(channel).send(
-                notifiable, notification
-            )
-        # TODO: should we subclass exception which can occur during sending with NotificationSendingException ?
-        # could allow to catch only those ones
+            channel_instance.send(notifiable, notification)
         except Exception as e:
             if notification.ignore_errors or fail_silently:
                 pass
@@ -103,19 +104,36 @@ class Notify(object):
             return notifiables
 
     def prepare_channels(self, channels):
-        """Process channels list to get a list of channels name. The list can
-        indeed contain channels class."""
+        """Check channels list to get a list of channels string name which
+        will be fetched from container later and also checks if custom notifications
+        classes are provided.
+
+        For custom notifications check that the class implements NotificationContract.
+        For driver notifications (official or not) check that the driver exists in the container.
+        """
         _channels = []
         for channel in channels:
             if isinstance(channel, str):
-                _channels.append(channel)
-            # check base driver class else discard OR raise exception ?
-            elif issubclass(channel, BaseDriver):
-                # get channel name
-                name = channel.replace("Driver", "").lower()
-                # TODO: from this name can we import driver if not registered in IOC ? No !
-                # We should instead get an import path ..
-                _channels.append(name)
+                # check that related notification driver is known and registered in the container
+                try:
+                    _channels.append(
+                        self.app.make("NotificationManager").driver(channel)
+                    )
+                except DriverNotFound:
+                    raise InvalidNotificationType(
+                        "{0} notification driver has not been found in the container. Check that it is registered correctly.".format(
+                            channel
+                        )
+                    )
+            elif self.is_custom_channel(channel):
+                _channels.append(channel())
+            else:
+                raise InvalidNotificationType(
+                    "{0} notification class cannot be used because it does not implements NotificationContract.".format(
+                        channel
+                    )
+                )
+
         return _channels
 
     def route(self, channel, route):
