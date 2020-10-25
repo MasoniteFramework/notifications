@@ -1,13 +1,15 @@
 import io
+import pdb
 import unittest
 import unittest.mock
 from masonite.testing import TestCase
-from masonite.drivers import Mailable, BroadcastPusherDriver
+from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
 from config.database import Model
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.drivers import NotificationBroadcastDriver
+from src.masonite.notifications.exceptions import BroadcastOnNotImplemented
 
 
 class User(Model, Notifiable):
@@ -45,7 +47,10 @@ class TestBroadcastNotifications(TestCase):
         # reset objects to default between tests
         WelcomeNotification.broadcast_on = lambda self: []
         WelcomeNotification.to_broadcast = to_broadcast
-        User.receives_broadcast_notifications_on = None
+        try:
+            del User.receives_broadcast_notifications_on
+        except:
+            pass
 
     def setUpFactories(self):
         User.create({
@@ -68,7 +73,7 @@ class TestBroadcastNotifications(TestCase):
         """When broadcast_on not defined on notification class, this method
         should be defined on Notifiable."""
         user = self.user()
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(BroadcastOnNotImplemented):
             user.notify(WelcomeNotification())
 
     def test_receives_broadcast_notifications_on(self):
@@ -85,7 +90,7 @@ class TestBroadcastNotifications(TestCase):
         channels = self.broadcast_driver.broadcast_on(user, WelcomeNotification())
         self.assertEqual(["channel_1"], channels)
 
-        User.receives_broadcast_notifications_on = None
+        del User.receives_broadcast_notifications_on
         WelcomeNotification.broadcast_on = lambda self: "channel_1"
         channels = self.broadcast_driver.broadcast_on(user, WelcomeNotification())
         self.assertEqual(["channel_1"], channels)

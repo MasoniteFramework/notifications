@@ -5,8 +5,8 @@ from masonite.helpers import config
 from masonite.queues import ShouldQueue
 from masonite.drivers import BaseDriver
 
-from ..exceptions import InvalidNotificationType
 from ..NotificationContract import NotificationContract
+from ..exceptions import BroadcastOnNotImplemented
 
 
 class NotificationBroadcastDriver(BaseDriver, NotificationContract):
@@ -53,10 +53,10 @@ class NotificationBroadcastDriver(BaseDriver, NotificationContract):
             else:
                 try:
                     channels = notifiable.receives_broadcast_notifications_on()
-                except:
-                    raise NotImplementedError(
-                        """No broadcast channels defined for the Notification.
-                    receives_broadcast_notifications_on() should be defined on the Notifiable."""
+                except AttributeError:
+                    raise BroadcastOnNotImplemented(
+                        """No broadcast channels defined for the Notification with broadcast_on(),
+                    receives_broadcast_notifications_on() must be defined on the Notifiable."""
                     )
 
         if isinstance(channels, str):

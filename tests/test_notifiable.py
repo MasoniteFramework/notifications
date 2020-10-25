@@ -1,14 +1,12 @@
 import io
-import sys
 import unittest
 import unittest.mock
-from masonite.app import App
 from masonite.testing import TestCase
-from masonite.drivers import MailTerminalDriver
 from config.database import Model
 
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.components import MailComponent
+from src.masonite.notifications.exceptions import NotificationRouteNotImplemented
 
 
 class WelcomeNotification(Notification):
@@ -150,5 +148,5 @@ class TestNotifiable(TestCase):
 
     def test_that_custom_driver_requires_routing_method(self):
         user = self.user()
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(NotificationRouteNotImplemented):
             user.route_notification_for("sms_service")

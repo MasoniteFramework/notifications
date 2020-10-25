@@ -1,6 +1,7 @@
 """Notifiable mixin"""
 from orator.orm import morph_many
 from .Notify import Notify
+from .exceptions import NotificationRouteNotImplemented
 
 
 class Notifiable(object):
@@ -36,7 +37,7 @@ class Notifiable(object):
             elif channel == "mail":
                 return self.email
             else:
-                raise NotImplementedError(
+                raise NotificationRouteNotImplemented(
                     "Notifiable model does not implement {}".format(method_name)
                 )
 

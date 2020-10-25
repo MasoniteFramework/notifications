@@ -6,7 +6,6 @@ from masonite.helpers import config
 from masonite.drivers import BaseDriver, Mailable
 from masonite.app import App
 
-from ..exceptions import InvalidNotificationType
 from ..NotificationContract import NotificationContract
 
 

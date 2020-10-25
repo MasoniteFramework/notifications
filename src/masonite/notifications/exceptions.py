@@ -3,6 +3,10 @@ class InvalidNotificationType(Exception):
     pass
 
 
+class NotificationRouteNotImplemented(Exception):
+    pass
+
+
 class NotificationFormatError(Exception):
     pass
 
@@ -10,6 +14,12 @@ class NotificationFormatError(Exception):
 # Database driver exceptions
 
 # Broadcast driver exceptions
+class BroadcastDriverException(Exception):
+    pass
+
+
+class BroadcastOnNotImplemented(Exception):
+    pass
 
 # Mail driver exceptions
 

@@ -5,8 +5,6 @@ from masonite.queues import ShouldQueue
 from masonite.drivers import BaseDriver
 from config.database import Model
 
-# from .exceptions import InvalidNotificationType
-
 
 class Notify(object):
     """Notify handler which handle sending/queuing notifications anonymously
