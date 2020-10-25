@@ -110,7 +110,7 @@ class TestDatabaseNotifications(TestCase):
             "notifiable_type": "users"
         })
         self.assertEqual(user.id, notification.notifiable.id)
-        self.assertEqual(user.__class__, notification.notifiable.__class__)
+        self.assertEqual(UserTest, notification.notifiable.__class__)
 
     def test_database_notification_read_state(self):
         notification = factory(DatabaseNotification).make(read_at=pendulum.now())
