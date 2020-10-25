@@ -2,6 +2,8 @@ masonite<3.0
 # TODO add this in setup.py
 # for testing only
 pytest
+mock
+
 pusher
 ably
 responses

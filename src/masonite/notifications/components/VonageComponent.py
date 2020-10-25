@@ -9,6 +9,9 @@ class VonageComponent(BaseComponent):
     _client_ref = ""
     _type = "text"
 
+    def __init__(self, text=""):
+        self._text = text
+
     def send_from(self, number):
         """Set the name or number the message should be sent from. Numbers should
         be specified in E.164 format. Details can be found here:
@@ -40,5 +43,5 @@ class VonageComponent(BaseComponent):
         if self._type:
             base_dict.update({"type": self._type})
         if self._client_ref:
-            base_dict.update({"client-ref": self._type})
+            base_dict.update({"client-ref": self._client_ref})
         return base_dict

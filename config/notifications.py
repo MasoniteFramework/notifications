@@ -2,11 +2,11 @@
 from masonite import env
 
 """
-Nexmo notifications driver settings.
+Vonage notifications driver settings.
 """
 
-NEXMO = {
-    'key': env('NEXMO_KEY', ""),
-    'secret': env('NEXMO_SECRET', ""),
-    'sms_from': env('NEXMO_SMS_FROM', "+33000000000")
+VONAGE = {
+    'key': env('VONAGE_KEY', ""),
+    'secret': env('VONAGE_SECRET', ""),
+    'sms_from': env('VONAGE_SMS_FROM', "+33000000000")
 }

@@ -4,7 +4,8 @@ from masonite.app import App
 from masonite.helpers import config
 
 from ..NotificationContract import NotificationContract
-from ..exceptions import NexmoInvalidMessage
+from ..exceptions import VonageInvalidMessage, VonageAPIError
+from ..components import VonageComponent
 
 
 class NotificationVonageDriver(BaseDriver, NotificationContract):
@@ -17,9 +18,9 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         """
         self.app = app
         import vonage
-        self._client = vonage.Client(key=config("notifications.nexmo.key"),
-                                     secret=config("notifications.nexmo.secret"))
-        self._sms_from = config("notifications.nexmo.sms_from") or None
+        self._client = vonage.Client(key=config("notifications.vonage.key"),
+                                     secret=config("notifications.vonage.secret"))
+        self._sms_from = config("notifications.vonage.sms_from") or None
 
     def send(self, notifiable, notification):
         """Used to send the SMS and run the logic for sending SMS."""
@@ -27,9 +28,15 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         recipients = self.get_recipients(notifiable, notification)
         from vonage.sms import Sms
         sms = Sms(self._client)
+        responses = []
         for recipient in recipients:
             payload = self.build_payload(data, recipient)
-            sms.send_message(payload)
+            import pdb ; pdb.set_trace()
+            response = sms.send_message(payload)
+            self._handle_errors(response)
+            responses.append(response)
+        import pdb; pdb.set_trace()
+        return responses
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
@@ -48,7 +55,11 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         return _recipients
 
     def build_payload(self, data, recipient):
-        """Build SMS payload sent to Vonage API""".
+        """Build SMS payload sent to Vonage API."""
+
+        if isinstance(data, str):
+            data = VonageComponent(data)
+
         # define send_from from config if not set
         if not data._from:
             data = data.send_from(self._sms_from)
@@ -63,6 +74,27 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         """Validate SMS payload before sending by checking that from et to
         are correctly set."""
         if not payload.get("from", None):
-            raise NexmoInvalidMessage("from must be specified.")
+            raise VonageInvalidMessage("from must be specified.")
         if not payload.get("to", None):
-            raise NexmoInvalidMessage("to must be specified.")
+            raise VonageInvalidMessage("to must be specified.")
+
+    def _handle_errors(self, response):
+        """Handle errors of Vonage API. Raises VonageAPIError if request does
+        not succeed.
+
+        An error message is structured as follows:
+        {'message-count': '1', 'messages': [{'status': '2', 'error-text': 'Missing api_key'}]}
+        As a success message can be structured as follows:
+        {'message-count': '1', 'messages': [{'to': '3365231278', 'message-id': '140000012BD37332', 'status': '0',
+        'remaining-balance': '1.87440000', 'message-price': '0.06280000', 'network': '20810'}]}
+
+        More informations on status code errors: https://developer.nexmo.com/api-errors/sms
+
+        """
+        import pdb ; pdb.set_trace()
+        for message in response.get("messages", []):
+            status = message["status"]
+            if status != "0":
+                raise VonageAPIError(
+                    "Code [{0}]: {1}. Please refer to API documentation for more details.".format(status, message["error-text"])
+                )

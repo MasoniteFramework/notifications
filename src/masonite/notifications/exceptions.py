@@ -35,9 +35,12 @@ class SlackInvalidMessage(SlackDriverException):
     pass
 
 
-# Nexmo driver exceptions
-class NexmoDriverException(Exception):
+# Vonage driver exceptions
+class VonageDriverException(Exception):
     pass
 
-class NexmoInvalidMessage(NexmoDriverException):
+class VonageInvalidMessage(VonageDriverException):
+    pass
+
+class VonageAPIError(VonageDriverException):
     pass

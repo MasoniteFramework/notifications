@@ -6,7 +6,7 @@ venv
 masonite_notifications.*
 dist/
 .vscode
-.env
+.env*
 package.db
 .coverage
 coverage.xml

@@ -1,10 +1,11 @@
 import responses
+import mock
 from masonite.testing import TestCase
-
 from config.database import Model
+
 from src.masonite.notifications import Notifiable, Notification, Notify
-from src.masonite.notifications.components import NexmoComponent
-from src.masonite.notifications.exceptions import NexmoInvalidMessage
+from src.masonite.notifications.components import VonageComponent
+from src.masonite.notifications.exceptions import VonageInvalidMessage, VonageAPIError
 
 
 class User(Model, Notifiable):
@@ -12,30 +13,50 @@ class User(Model, Notifiable):
 
     __fillable__ = ['name', 'email', 'password']
 
-    def route_notification_for_nexmo(self, notification):
-        return "+33123456789"
+    def route_notification_for_vonage(self, notification):
+        return "33752673234"
 
 
-def to_nexmo(self, notifiable):
-    return NexmoComponent().text("Welcome!").send_from("123456")
+def to_vonage(self, notifiable):
+    return VonageComponent().text("Welcome!").send_from("123456")
 
 
 class WelcomeNotification(Notification):
 
-    def to_nexmo(self, notifiable):
-        return to_nexmo(self, notifiable)
+    def to_vonage(self, notifiable):
+        return to_vonage(self, notifiable)
 
     def via(self, notifiable):
-        return ["nexmo"]
+        return ["vonage"]
 
 
-class TestNexmoNotifications(TestCase):
+class VonageAPIMock(object):
+    @staticmethod
+    def send_success():
+        return {
+            "message-count": 1,
+            "messages": [{
+                "status": "0"
+            }]
+        }
+    @staticmethod
+    def send_error(error="Missing api_key", status=2):
+        return {
+            "message-count": 1,
+            "messages": [{
+                "status": str(status),
+                "error-text": error
+            }]
+        }
+
+
+class TestVonageNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
         # reset objects to default between tests
-        WelcomeNotification.to_nexmo = to_nexmo
+        WelcomeNotification.to_vonage = to_vonage
 
     def setUpFactories(self):
         User.create({
@@ -47,43 +68,43 @@ class TestNexmoNotifications(TestCase):
     def user(self):
         return User.where("name", "Joe").get()[0]
 
-    def test_notification_should_implements_to_nexmo(self):
-        del WelcomeNotification.to_nexmo
+    def test_notification_should_implements_to_vonage(self):
+        del WelcomeNotification.to_vonage
         user = self.user()
         with self.assertRaises(NotImplementedError) as err:
             user.notify(WelcomeNotification())
-        self.assertEqual("Notification model should implement to_nexmo() method.",
+        self.assertEqual("Notification model should implement to_vonage() method.",
                          str(err.exception))
 
-    def test_to_nexmo_text(self):
-        message = NexmoComponent().text('Welcome text!')
+    def test_to_vonage_text(self):
+        message = VonageComponent().text('Welcome text!')
         self.assertEqual('Welcome text!', message._text)
 
-    def test_to_nexmo_send_from(self):
-        message = NexmoComponent().send_from("3615")
+    def test_to_vonage_send_from(self):
+        message = VonageComponent().send_from("3615")
         self.assertEqual('3615', message._from)
 
-    def test_to_nexmo_set_unicode(self):
-        self.assertEqual("text", NexmoComponent()._type)
-        message = NexmoComponent().set_unicode()
+    def test_to_vonage_set_unicode(self):
+        self.assertEqual("text", VonageComponent()._type)
+        message = VonageComponent().set_unicode()
         self.assertEqual("unicode", message._type)
 
-    def test_to_nexmo_client_ref(self):
-        message = NexmoComponent().client_ref("123456")
+    def test_to_vonage_client_ref(self):
+        message = VonageComponent().client_ref("123456")
         self.assertEqual("123456", message._client_ref)
 
-    def test_to_nexmo_as_dict(self):
-        message = NexmoComponent() \
+    def test_to_vonage_as_dict(self):
+        message = VonageComponent() \
             .text('Welcome text!') \
-            .send_from("Sam")
+            .send_from("123456")
         self.assertDictEqual({
             "text": "Welcome text!",
             "from": "123456",
             "type": "text",
-        })
+        }, message.as_dict())
 
-    def test_to_nexmo_as_dict_with_optionals(self):
-        message = NexmoComponent() \
+    def test_to_vonage_as_dict_with_optionals(self):
+        message = VonageComponent() \
             .text('Welcome text!') \
             .send_from("123456") \
             .set_unicode() \
@@ -93,18 +114,57 @@ class TestNexmoNotifications(TestCase):
             "from": "123456",
             "type": "unicode",
             "client-ref": "AZERTY"
-        })
+        }, message.as_dict())
 
-    def test_sending_sms_via_nexmo(self):
+    def test_sending_without_credentials(self):
+        user = self.user()
+        with self.assertRaises(VonageAPIError) as e:
+            user.notify(WelcomeNotification())
+        error_message = str(e.exception)
+        self.assertIn("Code [2]", error_message)
+        self.assertIn("api_key", error_message)
+
+    def test_sending(self):
+        user = self.user()
+        # patch vonage api
+        with mock.patch('vonage.sms.Sms', send_message=VonageAPIMock.send_success):
+            user.notify(WelcomeNotification())
+
+    def test_sending_message_with_string_only(self):
+        # TODO: set credentials
+        # TODO: set global from
+        def to_vonage(self, notifiable):
+            return "Welcome"
+        WelcomeNotification.to_vonage = to_vonage
         user = self.user()
         user.notify(WelcomeNotification())
 
-    def test_sending_raises_exception_when_no_from_or_to(self):
+    # @mock.patch("notifications.drivers.NotificationVonageDriver._sms_from")
+    # @patch("src.masonite.notifications.drivers.NotificationVonageDriver._sms_from", None)
+    def test_sending_raises_exception_when_no_from(self):
+        """Here from is not defined (not in global config and not in notification)."""
+        def to_vonage(self, notifiable):
+            return "Welcome"
+        WelcomeNotification.to_vonage = to_vonage
+        user = self.user()
+        with self.assertRaises(VonageInvalidMessage):
+            user.notify(WelcomeNotification())
+
+    def test_sending_raises_exception_when_no_to(self):
+        user = self.user()
+        user.route_notification_for_vonage = lambda n: ""
+        with self.assertRaises(VonageInvalidMessage):
+            user.notify(WelcomeNotification())
+
+    def test_that_send_from_can_be_set_in_config(self):
+        pass
+
+    def test_that_send_from_can_be_set_in_config(self):
         pass
 
     def test_that_routing_accepts_multiple_numbers(self):
-        def to_nexmo(notifiable):
-            return ["+33123456789", "+123 456 789"]
-        WelcomeNotification.to_nexmo = to_nexmo
+        def route_notification_for_vonage(notification):
+            return ["33623456789", "+123 456 789"]
         user = self.user()
+        user.route_notification_for_vonage = route_notification_for_vonage
         user.notify(WelcomeNotification())
