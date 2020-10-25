@@ -1,5 +1,6 @@
 import responses
-import mock
+# import mock
+from unittest.mock import patch
 from masonite.testing import TestCase
 from config.database import Model
 
@@ -34,6 +35,7 @@ class VonageAPIMock(object):
     @staticmethod
     def send_success():
         return {
+            "hoho": "hihi",
             "message-count": 1,
             "messages": [{
                 "status": "0"
@@ -126,23 +128,23 @@ class TestVonageNotifications(TestCase):
 
     def test_sending(self):
         user = self.user()
-        # patch vonage api
-        with mock.patch('vonage.sms.Sms', send_message=VonageAPIMock.send_success):
+        with patch('vonage.sms.Sms') as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
             user.notify(WelcomeNotification())
 
     def test_sending_message_with_string_only(self):
-        # TODO: set credentials
-        # TODO: set global from
         def to_vonage(self, notifiable):
             return "Welcome"
         WelcomeNotification.to_vonage = to_vonage
         user = self.user()
-        user.notify(WelcomeNotification())
+        with patch('vonage.sms.Sms') as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
+            user.notify(WelcomeNotification())
 
-    # @mock.patch("notifications.drivers.NotificationVonageDriver._sms_from")
-    # @patch("src.masonite.notifications.drivers.NotificationVonageDriver._sms_from", None)
+    @patch.dict('config.notifications.VONAGE', {'sms_from': None})
     def test_sending_raises_exception_when_no_from(self):
         """Here from is not defined (not in global config and not in notification)."""
+        # override config to remove from definition
         def to_vonage(self, notifiable):
             return "Welcome"
         WelcomeNotification.to_vonage = to_vonage
@@ -156,15 +158,23 @@ class TestVonageNotifications(TestCase):
         with self.assertRaises(VonageInvalidMessage):
             user.notify(WelcomeNotification())
 
-    def test_that_send_from_can_be_set_in_config(self):
-        pass
-
-    def test_that_send_from_can_be_set_in_config(self):
-        pass
-
     def test_that_routing_accepts_multiple_numbers(self):
         def route_notification_for_vonage(notification):
             return ["33623456789", "+123 456 789"]
         user = self.user()
         user.route_notification_for_vonage = route_notification_for_vonage
-        user.notify(WelcomeNotification())
+        with patch('vonage.sms.Sms') as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
+            user.notify(WelcomeNotification())
+
+    def test_that_vonage_api_error_code_is_available_when_error(self):
+        user = self.user()
+        with patch('vonage.sms.Sms') as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_error(
+                "Vonage code message", 12
+            )
+            with self.assertRaises(VonageAPIError) as e:
+                user.notify(WelcomeNotification())
+            error_message = str(e.exception)
+            self.assertIn("Code [12]", error_message)
+            self.assertIn("Vonage code message", error_message)

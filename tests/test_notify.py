@@ -101,13 +101,13 @@ class TestNotifyHandler(UserTestCase):
     @responses.activate
     def test_notifications_with_multiple_channels_in_via(self, mock_stderr):
         responses.add(responses.POST, webhook_url, body=b'ok')
+        # as all requests are mocked unmock the one for Vonage
+        responses.add_passthru("https://rest.nexmo.com/sms/json")
+
         class WelcomeNotification(Notification):
 
             def to_mail(self, notifiable):
                 return MailComponent().subject('Welcome')
-
-            def to_broadcast(self, notifiable):
-                return {"message": "Welcome"}
 
             def to_database(self, notifiable):
                 return {"message": "Welcome"}
@@ -118,21 +118,20 @@ class TestNotifyHandler(UserTestCase):
             def to_vonage(self, notifiable):
                 return VonageComponent().text("Welcome")
 
-            def broadcast_on(self):
-                return "all"
-
             def via(self, notifiable):
-                return ["mail", "broadcast", "database", "slack", "vonage"]
+                return ["mail", "database", "slack", "vonage"]
 
         user = self.user()
         user.route_notification_for_slack = lambda n: webhook_url
-        user.notify(WelcomeNotification(), fail_silently=True)
+        user.route_notification_for_vonage = lambda n: "33656789101"
+
+        # mock vonage api
+        with unittest.mock.patch('vonage.sms.Sms') as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = {}
+            user.notify(WelcomeNotification())
         # check email driver
         self.assertIn("Welcome", mock_stderr.getvalue())
         # check database driver
         self.assertEqual(1, user.notifications().count())
         # check slack driver
         self.assertTrue(responses.assert_call_count(webhook_url, 1))
-        # TODO: check broadcast driver ? how
-
-        # TODO: check vonage driver

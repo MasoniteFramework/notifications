@@ -31,11 +31,9 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         responses = []
         for recipient in recipients:
             payload = self.build_payload(data, recipient)
-            import pdb ; pdb.set_trace()
             response = sms.send_message(payload)
             self._handle_errors(response)
             responses.append(response)
-        import pdb; pdb.set_trace()
         return responses
 
     def get_recipients(self, notifiable, notification):
@@ -91,7 +89,6 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         More informations on status code errors: https://developer.nexmo.com/api-errors/sms
 
         """
-        import pdb ; pdb.set_trace()
         for message in response.get("messages", []):
             status = message["status"]
             if status != "0":
