@@ -21,10 +21,10 @@ class BroadcastDriverException(Exception):
 class BroadcastOnNotImplemented(Exception):
     pass
 
+
 # Mail driver exceptions
 
-# Slack driver exceptions
-# https://api.slack.com/messaging/webhooks#handling_errors
+# Slack driver exceptions: # https://api.slack.com/messaging/webhooks#handling_errors
 class SlackDriverException(Exception):
     pass
 

@@ -15,17 +15,14 @@ from src.masonite.notifications.exceptions import BroadcastOnNotImplemented
 class User(Model, Notifiable):
     """User Model"""
 
-    __fillable__ = ['name', 'email', 'password']
+    __fillable__ = ["name", "email", "password"]
 
 
 def to_broadcast(self, notifiable):
-    return {
-        "data": "Welcome {0}!".format(notifiable.name)
-    }
+    return {"data": "Welcome {0}!".format(notifiable.name)}
 
 
 class WelcomeNotification(Notification):
-
     def to_broadcast(self, notifiable):
         return to_broadcast(self, notifiable)
 
@@ -34,16 +31,15 @@ class WelcomeNotification(Notification):
 
 
 class TestBroadcastNotifications(TestCase):
-
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
-        self.container.bind('NotificationBroadcastDriver', NotificationBroadcastDriver)
+        self.container.bind("NotificationBroadcastDriver", NotificationBroadcastDriver)
         # tests are made with Pusher driver
-        self.container.bind('BroadcastPusherDriver', BroadcastPusherDriver)
-        self.container.bind('BroadcastManager', BroadcastManager)
+        self.container.bind("BroadcastPusherDriver", BroadcastPusherDriver)
+        self.container.bind("BroadcastManager", BroadcastManager)
 
-        self.broadcast_driver = self.container.make('NotificationBroadcastDriver')
+        self.broadcast_driver = self.container.make("NotificationBroadcastDriver")
         # reset objects to default between tests
         WelcomeNotification.broadcast_on = lambda self: []
         WelcomeNotification.to_broadcast = to_broadcast
@@ -53,11 +49,7 @@ class TestBroadcastNotifications(TestCase):
             pass
 
     def setUpFactories(self):
-        User.create({
-            'name': 'Joe',
-            'email': 'user@example.com',
-            'password': 'secret'
-        })
+        User.create({"name": "Joe", "email": "user@example.com", "password": "secret"})
 
     def user(self):
         return User.all()[-1]
@@ -65,6 +57,7 @@ class TestBroadcastNotifications(TestCase):
     def test_sending_notification_to_user(self):
         def broadcast_on(self):
             return "all_users"
+
         WelcomeNotification.broadcast_on = broadcast_on
         user = self.user()
         user.notify(WelcomeNotification())
@@ -80,6 +73,7 @@ class TestBroadcastNotifications(TestCase):
         # add method to notifiable
         def receives_broadcast_notifications_on(notifiable):
             return "users.{}".format(notifiable.id)
+
         User.receives_broadcast_notifications_on = receives_broadcast_notifications_on
         user = self.user()
         user.notify(WelcomeNotification())
@@ -105,7 +99,9 @@ class TestBroadcastNotifications(TestCase):
         data = self.broadcast_driver.get_data("broadcast", user, WelcomeNotification())
         self.assertDictEqual({"message": "hello"}, data)
 
-        WelcomeNotification.to_broadcast = lambda self, notifiable: {"message": "hello {0}".format(notifiable.name)}
+        WelcomeNotification.to_broadcast = lambda self, notifiable: {
+            "message": "hello {0}".format(notifiable.name)
+        }
         data = self.broadcast_driver.get_data("broadcast", user, WelcomeNotification())
         self.assertDictEqual({"message": "hello Joe"}, data)
 
@@ -114,10 +110,12 @@ class TestBroadcastNotifications(TestCase):
         user = self.user()
         with self.assertRaises(NotImplementedError) as err:
             user.notify(WelcomeNotification())
-        self.assertEqual("Notification model should implement to_broadcast() method.",
-                         str(err.exception))
+        self.assertEqual(
+            "Notification model should implement to_broadcast() method.",
+            str(err.exception),
+        )
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_to_anonymous(self, mock_stderr):
         WelcomeNotification.to_broadcast = lambda self, notifiable: {"message": "hello"}
         self.notification.route("broadcast", "users").notify(WelcomeNotification())

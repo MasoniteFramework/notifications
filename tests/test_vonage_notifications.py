@@ -1,4 +1,5 @@
 import responses
+
 # import mock
 from unittest.mock import patch
 from masonite.testing import TestCase
@@ -12,7 +13,7 @@ from src.masonite.notifications.exceptions import VonageInvalidMessage, VonageAP
 class User(Model, Notifiable):
     """User Model"""
 
-    __fillable__ = ['name', 'email', 'password']
+    __fillable__ = ["name", "email", "password"]
 
     def route_notification_for_vonage(self, notification):
         return "33752673234"
@@ -23,7 +24,6 @@ def to_vonage(self, notifiable):
 
 
 class WelcomeNotification(Notification):
-
     def to_vonage(self, notifiable):
         return to_vonage(self, notifiable)
 
@@ -34,26 +34,17 @@ class WelcomeNotification(Notification):
 class VonageAPIMock(object):
     @staticmethod
     def send_success():
-        return {
-            "hoho": "hihi",
-            "message-count": 1,
-            "messages": [{
-                "status": "0"
-            }]
-        }
+        return {"hoho": "hihi", "message-count": 1, "messages": [{"status": "0"}]}
+
     @staticmethod
     def send_error(error="Missing api_key", status=2):
         return {
             "message-count": 1,
-            "messages": [{
-                "status": str(status),
-                "error-text": error
-            }]
+            "messages": [{"status": str(status), "error-text": error}],
         }
 
 
 class TestVonageNotifications(TestCase):
-
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
@@ -61,11 +52,13 @@ class TestVonageNotifications(TestCase):
         WelcomeNotification.to_vonage = to_vonage
 
     def setUpFactories(self):
-        User.create({
-            'name': 'Joe',
-            'email': 'user@example.com',
-            'password': 'secret',
-        })
+        User.create(
+            {
+                "name": "Joe",
+                "email": "user@example.com",
+                "password": "secret",
+            }
+        )
 
     def user(self):
         return User.where("name", "Joe").get()[0]
@@ -75,16 +68,18 @@ class TestVonageNotifications(TestCase):
         user = self.user()
         with self.assertRaises(NotImplementedError) as err:
             user.notify(WelcomeNotification())
-        self.assertEqual("Notification model should implement to_vonage() method.",
-                         str(err.exception))
+        self.assertEqual(
+            "Notification model should implement to_vonage() method.",
+            str(err.exception),
+        )
 
     def test_to_vonage_text(self):
-        message = VonageComponent().text('Welcome text!')
-        self.assertEqual('Welcome text!', message._text)
+        message = VonageComponent().text("Welcome text!")
+        self.assertEqual("Welcome text!", message._text)
 
     def test_to_vonage_send_from(self):
         message = VonageComponent().send_from("3615")
-        self.assertEqual('3615', message._from)
+        self.assertEqual("3615", message._from)
 
     def test_to_vonage_set_unicode(self):
         self.assertEqual("text", VonageComponent()._type)
@@ -96,27 +91,33 @@ class TestVonageNotifications(TestCase):
         self.assertEqual("123456", message._client_ref)
 
     def test_to_vonage_as_dict(self):
-        message = VonageComponent() \
-            .text('Welcome text!') \
-            .send_from("123456")
-        self.assertDictEqual({
-            "text": "Welcome text!",
-            "from": "123456",
-            "type": "text",
-        }, message.as_dict())
+        message = VonageComponent().text("Welcome text!").send_from("123456")
+        self.assertDictEqual(
+            {
+                "text": "Welcome text!",
+                "from": "123456",
+                "type": "text",
+            },
+            message.as_dict(),
+        )
 
     def test_to_vonage_as_dict_with_optionals(self):
-        message = VonageComponent() \
-            .text('Welcome text!') \
-            .send_from("123456") \
-            .set_unicode() \
+        message = (
+            VonageComponent()
+            .text("Welcome text!")
+            .send_from("123456")
+            .set_unicode()
             .client_ref("AZERTY")
-        self.assertDictEqual({
-            "text": "Welcome text!",
-            "from": "123456",
-            "type": "unicode",
-            "client-ref": "AZERTY"
-        }, message.as_dict())
+        )
+        self.assertDictEqual(
+            {
+                "text": "Welcome text!",
+                "from": "123456",
+                "type": "unicode",
+                "client-ref": "AZERTY",
+            },
+            message.as_dict(),
+        )
 
     def test_sending_without_credentials(self):
         user = self.user()
@@ -128,25 +129,31 @@ class TestVonageNotifications(TestCase):
 
     def test_sending(self):
         user = self.user()
-        with patch('vonage.sms.Sms') as MockSmsClass:
-            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
+        with patch("vonage.sms.Sms") as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = (
+                VonageAPIMock().send_success()
+            )
             user.notify(WelcomeNotification())
 
     def test_sending_message_with_string_only(self):
         def to_vonage(self, notifiable):
             return "Welcome"
+
         WelcomeNotification.to_vonage = to_vonage
         user = self.user()
-        with patch('vonage.sms.Sms') as MockSmsClass:
-            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
+        with patch("vonage.sms.Sms") as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = (
+                VonageAPIMock().send_success()
+            )
             user.notify(WelcomeNotification())
 
-    @patch.dict('config.notifications.VONAGE', {'sms_from': None})
+    @patch.dict("config.notifications.VONAGE", {"sms_from": None})
     def test_sending_raises_exception_when_no_from(self):
         """Here from is not defined (not in global config and not in notification)."""
         # override config to remove from definition
         def to_vonage(self, notifiable):
             return "Welcome"
+
         WelcomeNotification.to_vonage = to_vonage
         user = self.user()
         with self.assertRaises(VonageInvalidMessage):
@@ -161,17 +168,20 @@ class TestVonageNotifications(TestCase):
     def test_that_routing_accepts_multiple_numbers(self):
         def route_notification_for_vonage(notification):
             return ["33623456789", "+123 456 789"]
+
         user = self.user()
         user.route_notification_for_vonage = route_notification_for_vonage
-        with patch('vonage.sms.Sms') as MockSmsClass:
-            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_success()
+        with patch("vonage.sms.Sms") as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = (
+                VonageAPIMock().send_success()
+            )
             user.notify(WelcomeNotification())
 
     def test_that_vonage_api_error_code_is_available_when_error(self):
         user = self.user()
-        with patch('vonage.sms.Sms') as MockSmsClass:
-            MockSmsClass.return_value.send_message.return_value = VonageAPIMock().send_error(
-                "Vonage code message", 12
+        with patch("vonage.sms.Sms") as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = (
+                VonageAPIMock().send_error("Vonage code message", 12)
             )
             with self.assertRaises(VonageAPIError) as e:
                 user.notify(WelcomeNotification())

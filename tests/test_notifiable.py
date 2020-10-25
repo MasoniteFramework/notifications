@@ -10,9 +10,12 @@ from src.masonite.notifications.exceptions import NotificationRouteNotImplemente
 
 
 class WelcomeNotification(Notification):
-
     def to_mail(self, notifiable):
-        return MailComponent().subject('Welcome {0}'.format(notifiable.name)).heading('Welcome email heading !')
+        return (
+            MailComponent()
+            .subject("Welcome {0}".format(notifiable.name))
+            .heading("Welcome email heading !")
+        )
 
     def via(self, notifiable):
         return ["mail"]
@@ -21,7 +24,7 @@ class WelcomeNotification(Notification):
 class User(Model, Notifiable):
     """User Model"""
 
-    __fillable__ = ['name', 'email', 'password']
+    __fillable__ = ["name", "email", "password"]
 
     def route_notification_for_slack(self, notifiable):
         return "#channel-{}".format(self.name.lower())
@@ -33,16 +36,8 @@ class TestNotifiable(TestCase):
         self.notification = Notify(self.container)
 
     def setUpFactories(self):
-        User.create({
-            'name': 'Joe',
-            'email': 'user@example.com',
-            'password': 'secret'
-        })
-        User.create({
-            'name': 'John',
-            'email': 'john@example.com',
-            'password': 'secret'
-        })
+        User.create({"name": "Joe", "email": "user@example.com", "password": "secret"})
+        User.create({"name": "John", "email": "john@example.com", "password": "secret"})
 
     def user(self):
         return User.where("name", "Joe").get()[0]
@@ -55,50 +50,50 @@ class TestNotifiable(TestCase):
         self.assertTrue(callable(user.notify))
         self.assertTrue(callable(user.notify_now))
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_send_notification_to_user_through_notifiable_mixin(self, mock_stderr):
         user = self.user()
         user.notify(WelcomeNotification())
         printed_email = mock_stderr.getvalue()
-        self.assertIn('user@example.com', printed_email)
-        self.assertIn('Welcome Joe', printed_email)
+        self.assertIn("user@example.com", printed_email)
+        self.assertIn("Welcome Joe", printed_email)
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_send_notification_to_user_through_notify_class(self, mock_stderr):
         user = self.user()
         # works but was mostly designed to send to multiple notifiables
         self.notification.send(user, WelcomeNotification())
-        self.assertIn('user@example.com', mock_stderr.getvalue())
+        self.assertIn("user@example.com", mock_stderr.getvalue())
 
         # send to multiple notifiables
         users = User.all()
         self.notification.send(users, WelcomeNotification())
         printed_email = mock_stderr.getvalue()
-        self.assertIn('user@example.com', printed_email)
-        self.assertIn('john@example.com', printed_email)
+        self.assertIn("user@example.com", printed_email)
+        self.assertIn("john@example.com", printed_email)
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_dry_on_notifiable_notify_method(self, mock_stderr):
         user = self.user()
         user.notify(WelcomeNotification(), dry=True)
         printed_email = mock_stderr.getvalue()
         # no email sent
-        self.assertEqual('', printed_email)
+        self.assertEqual("", printed_email)
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_fail_silently_on_notifiable_notify_method(self, mock_stderr):
         class FailingNotification(Notification):
-
             def to_mail(self, notifiable):
                 raise Exception("Mock exception when sending")
 
             def via(self, notifiable):
                 return ["mail"]
+
         user = self.user()
         user.notify(FailingNotification(), fail_silently=True)
         printed_email = mock_stderr.getvalue()
         # no email sent
-        self.assertEqual('', printed_email)
+        self.assertEqual("", printed_email)
 
     def test_notification_mail_default_routing(self):
         user = self.user()
@@ -110,6 +105,7 @@ class TestNotifiable(TestCase):
 
         def route(notifiable):
             return "john.doe@example.com"
+
         setattr(user, "route_notification_for_mail", route)
         self.assertEqual("john.doe@example.com", user.route_notification_for("mail"))
 
@@ -118,19 +114,27 @@ class TestNotifiable(TestCase):
 
         def route(notifiable):
             return (notifiable.email, notifiable.name)
+
         setattr(user, "route_notification_for_mail", route)
-        self.assertEqual(("user@example.com", "Joe"), user.route_notification_for("mail"))
+        self.assertEqual(
+            ("user@example.com", "Joe"), user.route_notification_for("mail")
+        )
 
         def route(notifiable):
             return ["mail1@masonite.com", "mail2@masonite.com"]
+
         setattr(user, "route_notification_for_mail", route)
-        self.assertEqual(["mail1@masonite.com", "mail2@masonite.com"], user.route_notification_for("mail"))
+        self.assertEqual(
+            ["mail1@masonite.com", "mail2@masonite.com"],
+            user.route_notification_for("mail"),
+        )
 
     def test_notification_mail_incorrect_custom_routing_with_list(self):
         user = self.user()
 
         def route(notifiable):
             return (notifiable.email, "")
+
         setattr(user, "route_notification_for_mail", route)
         with self.assertRaises(ValueError):
             user.notify(WelcomeNotification())

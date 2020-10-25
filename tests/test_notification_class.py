@@ -9,9 +9,8 @@ from src.masonite.notifications.components import MailComponent
 
 
 class WelcomeNotification(Notification):
-
     def to_mail(self, notifiable):
-        return MailComponent().subject('Welcome')
+        return MailComponent().subject("Welcome")
 
     def via(self, notifiable):
         return ["mail"]
@@ -35,5 +34,6 @@ class TestNotificationClass(TestCase):
         self.assertTrue(notification.ignore_errors)
 
     def test_notification_type(self):
-        self.assertEqual("WelcomeNotification",
-                         WelcomeNotification().notification_type())
+        self.assertEqual(
+            "WelcomeNotification", WelcomeNotification().notification_type()
+        )

@@ -7,57 +7,65 @@ from masonite.managers import BroadcastManager
 
 from .UserTestCase import UserTestCase
 from src.masonite.notifications import Notification
-from src.masonite.notifications.components import MailComponent, SlackComponent, \
-    VonageComponent
+from src.masonite.notifications.components import (
+    MailComponent,
+    SlackComponent,
+    VonageComponent,
+)
 
 
 webhook_url = "https://hooks.slack.com/services/X/Y"
 
 
 class WelcomeNotification(Notification):
-
     def __init__(self, name):
         super().__init__()
         self.name = name
 
     def to_mail(self, notifiable):
-        return MailComponent().subject('Welcome {0}!'.format(self.name)).heading('Welcome email heading !')
+        return (
+            MailComponent()
+            .subject("Welcome {0}!".format(self.name))
+            .heading("Welcome email heading !")
+        )
 
     def via(self, notifiable):
         return ["mail"]
 
 
 class TestNotifyHandler(UserTestCase):
-
     def setUp(self):
         super().setUp()
         # tests are made with Pusher driver
-        self.container.bind('BroadcastPusherDriver', BroadcastPusherDriver)
-        self.container.bind('BroadcastManager', BroadcastManager)
+        self.container.bind("BroadcastPusherDriver", BroadcastPusherDriver)
+        self.container.bind("BroadcastManager", BroadcastManager)
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_send_notification_to_anonymous_user(self, mock_stderr):
         user_email = "john.doe@masonite.com"
         self.notification.route("mail", user_email).notify(WelcomeNotification("John"))
         printed_email = mock_stderr.getvalue()
-        self.assertIn('john.doe@masonite.com', printed_email)
-        self.assertIn('Welcome John', printed_email)
+        self.assertIn("john.doe@masonite.com", printed_email)
+        self.assertIn("Welcome John", printed_email)
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
-    def test_send_notification_to_anonymous_user_with_multiple_channels(self, mock_stderr):
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
+    def test_send_notification_to_anonymous_user_with_multiple_channels(
+        self, mock_stderr
+    ):
         user_email = "john.doe@masonite.com"
-        self.notification.route("mail", user_email).route("slack", "#general").notify(WelcomeNotification("John"))
+        self.notification.route("mail", user_email).route("slack", "#general").notify(
+            WelcomeNotification("John")
+        )
         # check email notification sent
         printed_email = mock_stderr.getvalue()
-        self.assertIn('john.doe@masonite.com', printed_email)
+        self.assertIn("john.doe@masonite.com", printed_email)
         # TODO: check Slack notification sent ?
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_dry_notification_on_notification_class(self, mock_stderr):
         class WelcomeNotification(Notification):
-
             def to_mail(self, notifiable):
-                return MailComponent().subject('Welcome')
+                return MailComponent().subject("Welcome")
 
             def via(self, notifiable):
                 return ["mail"]
@@ -66,15 +74,14 @@ class TestNotifyHandler(UserTestCase):
         user.notify(WelcomeNotification().dry())
         self.assertEqual("", mock_stderr.getvalue())
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_dry_notification_on_notification_interface(self, mock_stderr):
         user = self.user()
         self.notification.send(user, WelcomeNotification("sam"), dry=True)
-        self.assertEqual('', mock_stderr.getvalue())
+        self.assertEqual("", mock_stderr.getvalue())
 
     def test_sending_notification_failing_silently_on_notification_class(self):
         class WelcomeNotification(Notification):
-
             def to_mail(self, notifiable):
                 raise Exception("Mock exception when sending")
 
@@ -87,27 +94,26 @@ class TestNotifyHandler(UserTestCase):
 
     def test_sending_fail_silently_notification_on_notification_interface(self):
         class FailingNotification(Notification):
-
             def to_mail(self, notifiable):
                 return Exception("Mock test error")
 
             def via(self, notifiable):
                 return ["mail"]
+
         user = self.user()
         self.notification.send(user, FailingNotification(), fail_silently=True)
         # no exception raised
 
-    @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
+    @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     @responses.activate
     def test_notifications_with_multiple_channels_in_via(self, mock_stderr):
-        responses.add(responses.POST, webhook_url, body=b'ok')
+        responses.add(responses.POST, webhook_url, body=b"ok")
         # as all requests are mocked unmock the one for Vonage
         responses.add_passthru("https://rest.nexmo.com/sms/json")
 
         class WelcomeNotification(Notification):
-
             def to_mail(self, notifiable):
-                return MailComponent().subject('Welcome')
+                return MailComponent().subject("Welcome")
 
             def to_database(self, notifiable):
                 return {"message": "Welcome"}
@@ -126,7 +132,7 @@ class TestNotifyHandler(UserTestCase):
         user.route_notification_for_vonage = lambda n: "33656789101"
 
         # mock vonage api
-        with unittest.mock.patch('vonage.sms.Sms') as MockSmsClass:
+        with unittest.mock.patch("vonage.sms.Sms") as MockSmsClass:
             MockSmsClass.return_value.send_message.return_value = {}
             user.notify(WelcomeNotification())
         # check email driver
