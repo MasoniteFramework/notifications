@@ -20,7 +20,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
             app {masonite.app.App} -- The Masonite container object.
         """
         self.app = app
-        self._view = self.app.make('View')
+        self._view = self.app.make("View")
 
     def send(self, notifiable, notification):
         """Used to send the email and run the logic for sending emails."""
@@ -38,10 +38,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
         # data can be a MailComponent or a Mailable
         driver_instance = self.get_mail_driver()
         if isinstance(data, Mailable):
-            return driver_instance \
-                .mailable(data) \
-                .to(recipients) \
-                .send()
+            return driver_instance.mailable(data).to(recipients).send()
         else:
             mail = driver_instance.to(recipients).subject(data._subject)
             reply_to_recipients = self.get_reply_to_recipients(data._reply_to)
@@ -55,14 +52,14 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
     def get_mail_driver(self):
         """Shortcut method to get given mail driver instance."""
         driver = config("mail.driver") if not self._driver else None
-        return self.app.make('Mail').driver(driver)
+        return self.app.make("Mail").driver(driver)
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
-            return email
-            return {email: name}
-            return [email1, email2]
-            return [{email1: ''}, {email2: name2}]
+        return email
+        return {email: name}
+        return [email1, email2]
+        return [{email1: ''}, {email2: name2}]
         """
         recipients = notifiable.route_notification_for("mail", notification)
         # multiple recipients
@@ -89,7 +86,9 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
             return recipient
         elif isinstance(recipient, tuple):
             if len(recipient) != 2 or not recipient[1]:
-                raise ValueError("route_notification_for_mail() should return a string or a tuple (email, name)")
+                raise ValueError(
+                    "route_notification_for_mail() should return a string or a tuple (email, name)"
+                )
             return "{1} <{0}>".format(*recipient)
 
     def driver(self, driver):

@@ -40,21 +40,24 @@ class NotificationBroadcastDriver(BaseDriver, NotificationContract):
     def get_broadcast_driver(self):
         """Shortcut method to get given broadcast driver instance."""
         driver = config("broadcast.driver") if not self._driver else None
-        return self.app.make('BroadcastManager').driver(driver)
+        return self.app.make("BroadcastManager").driver(driver)
 
     def broadcast_on(self, notifiable, notification):
         """Get the channels the notification should be broadcasted on."""
         channels = notification.broadcast_on()
         if not channels:
             from ..AnonymousNotifiable import AnonymousNotifiable
+
             if isinstance(notifiable, AnonymousNotifiable):
                 channels = notifiable.route_notification_for("broadcast", notification)
             else:
                 try:
                     channels = notifiable.receives_broadcast_notifications_on()
                 except:
-                    raise NotImplementedError("""No broadcast channels defined for the Notification.
-                    receives_broadcast_notifications_on() should be defined on the Notifiable.""")
+                    raise NotImplementedError(
+                        """No broadcast channels defined for the Notification.
+                    receives_broadcast_notifications_on() should be defined on the Notifiable."""
+                    )
 
         if isinstance(channels, str):
             channels = [channels]

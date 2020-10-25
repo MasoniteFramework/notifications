@@ -2,8 +2,10 @@
 class InvalidNotificationType(Exception):
     pass
 
+
 class NotificationFormatError(Exception):
     pass
+
 
 # Database driver exceptions
 
@@ -16,20 +18,26 @@ class NotificationFormatError(Exception):
 class SlackDriverException(Exception):
     pass
 
+
 class SlackChannelNotFound(SlackDriverException):
     pass
+
 
 class SlackChannelArchived(SlackDriverException):
     pass
 
+
 class SlackPostForbidden(SlackDriverException):
     pass
+
 
 class SlackInvalidWebhook(SlackDriverException):
     pass
 
+
 class SlackInvalidWorkspace(SlackDriverException):
     pass
+
 
 class SlackInvalidMessage(SlackDriverException):
     pass
@@ -39,8 +47,10 @@ class SlackInvalidMessage(SlackDriverException):
 class VonageDriverException(Exception):
     pass
 
+
 class VonageInvalidMessage(VonageDriverException):
     pass
+
 
 class VonageAPIError(VonageDriverException):
     pass

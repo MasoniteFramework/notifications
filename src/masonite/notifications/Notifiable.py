@@ -4,16 +4,21 @@ from .Notify import Notify
 
 
 class Notifiable(object):
-
     def notify(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification."""
         from wsgi import container
-        return Notify(container).send(self, notification, channels=[], dry=dry, fail_silently=fail_silently)
+
+        return Notify(container).send(
+            self, notification, channels=[], dry=dry, fail_silently=fail_silently
+        )
 
     def notify_now(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification immediately."""
         from wsgi import container
-        return Notify(container).send_now(self, notification, channels, dry, fail_silently)
+
+        return Notify(container).send_now(
+            self, notification, channels, dry, fail_silently
+        )
 
     def route_notification_for(self, channel, notification=None):
         """Get the notification routing information for the given channel."""
@@ -31,7 +36,9 @@ class Notifiable(object):
             elif channel == "mail":
                 return self.email
             else:
-                raise NotImplementedError("Notifiable model does not implement {}".format(method_name))
+                raise NotImplementedError(
+                    "Notifiable model does not implement {}".format(method_name)
+                )
 
     # TODO: this does not work it returns empty
     # @morph_many('notifiable')
@@ -45,16 +52,26 @@ class Notifiable(object):
         """Get the entity's notifications. Only for 'database'
         notifications."""
         from .models import DatabaseNotification
-        return DatabaseNotification.where("notifiable_id", self.id).order_by("created_at").get()
+
+        return (
+            DatabaseNotification.where("notifiable_id", self.id)
+            .order_by("created_at")
+            .get()
+        )
 
     def unread_notifications(self):
         """Get the entity's unread notifications. Only for 'database'
         notifications."""
-        return self.notifications().where('read_at', None)
+        return self.notifications().where("read_at", None)
 
     def read_notifications(self):
         """Get the entity's read notifications. Only for 'database'
         notifications."""
         from .models import DatabaseNotification
-        return DatabaseNotification.where("notifiable_id", self.id) \
-            .where('read_at', '!=', "").order_by("created_at").get()
+
+        return (
+            DatabaseNotification.where("notifiable_id", self.id)
+            .where("read_at", "!=", "")
+            .order_by("created_at")
+            .get()
+        )

@@ -9,7 +9,6 @@ from ..components import VonageComponent
 
 
 class NotificationVonageDriver(BaseDriver, NotificationContract):
-
     def __init__(self, app: App):
         """Vonage Driver Constructor.
 
@@ -18,8 +17,11 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         """
         self.app = app
         import vonage
-        self._client = vonage.Client(key=config("notifications.vonage.key"),
-                                     secret=config("notifications.vonage.secret"))
+
+        self._client = vonage.Client(
+            key=config("notifications.vonage.key"),
+            secret=config("notifications.vonage.secret"),
+        )
         self._sms_from = config("notifications.vonage.sms_from") or None
 
     def send(self, notifiable, notification):
@@ -27,6 +29,7 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         data = self.get_data("vonage", notifiable, notification)
         recipients = self.get_recipients(notifiable, notification)
         from vonage.sms import Sms
+
         sms = Sms(self._client)
         responses = []
         for recipient in recipients:
@@ -61,10 +64,7 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         # define send_from from config if not set
         if not data._from:
             data = data.send_from(self._sms_from)
-        payload = {
-            **data.as_dict(),
-            "to": recipient
-        }
+        payload = {**data.as_dict(), "to": recipient}
         self._validate_payload(payload)
         return payload
 
@@ -93,5 +93,7 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
             status = message["status"]
             if status != "0":
                 raise VonageAPIError(
-                    "Code [{0}]: {1}. Please refer to API documentation for more details.".format(status, message["error-text"])
+                    "Code [{0}]: {1}. Please refer to API documentation for more details.".format(
+                        status, message["error-text"]
+                    )
                 )

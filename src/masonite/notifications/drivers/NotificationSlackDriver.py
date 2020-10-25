@@ -4,8 +4,14 @@ import requests
 from masonite.app import App
 from masonite.drivers import BaseDriver
 
-from ..exceptions import SlackChannelNotFound, SlackInvalidMessage, SlackInvalidWorkspace, SlackPostForbidden, SlackChannelArchived, \
-    SlackInvalidWebhook
+from ..exceptions import (
+    SlackChannelNotFound,
+    SlackInvalidMessage,
+    SlackInvalidWorkspace,
+    SlackPostForbidden,
+    SlackChannelArchived,
+    SlackInvalidWebhook,
+)
 from ..NotificationContract import NotificationContract
 
 
@@ -53,7 +59,9 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             for recipient in recipients:
                 _modes.append(self._check_recipient_type(recipient))
             if self.API_MODE in _modes and self.WEBHOOK_MODE in _modes:
-                raise ValueError("NotificationSlackDriver: sending mode cannot be mixed.")
+                raise ValueError(
+                    "NotificationSlackDriver: sending mode cannot be mixed."
+                )
         else:
             mode = self._check_recipient_type(recipients)
             self.sending_mode = mode
@@ -72,8 +80,7 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             print(data)
         for webhook_url in webhook_urls:
             response = requests.post(
-                webhook_url, data=data,
-                headers={'Content-Type': 'application/json'}
+                webhook_url, data=data, headers={"Content-Type": "application/json"}
             )
             if response.status_code != 200:
                 self._handle_webhook_error(response, payload)
@@ -120,15 +127,24 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             )
         elif response.text == "channel_not_found":
             raise SlackChannelNotFound(
-                "The user or channel being addressed either do not exist or is invalid: {}".format(payload._channel)
+                "The user or channel being addressed either do not exist or is invalid: {}".format(
+                    payload._channel
+                )
             )
         elif response.text == "channel_is_archived":
             raise SlackChannelArchived(
-                "The channel being addressed has been archived and is no longer accepting new messages: {}".format(payload._channel)
+                "The channel being addressed has been archived and is no longer accepting new messages: {}".format(
+                    payload._channel
+                )
             )
-        elif response.text in ["action_prohibited", "posting_to_general_channel_denied"]:
+        elif response.text in [
+            "action_prohibited",
+            "posting_to_general_channel_denied",
+        ]:
             raise SlackPostForbidden(
-                "You don't have the permission to post to this channel right now: {}".format(payload._channel)
+                "You don't have the permission to post to this channel right now: {}".format(
+                    payload._channel
+                )
             )
         elif response.text in ["no_service", "no_service_id"]:
             raise SlackInvalidWebhook(
@@ -138,6 +154,7 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             raise SlackInvalidWorkspace(
                 "The Slack workspace is no longer active or is missing or invalid."
             )
+
     # def serialize_data(self, data):
     #     return json.dumps(data)
 

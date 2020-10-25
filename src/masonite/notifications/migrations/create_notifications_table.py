@@ -2,7 +2,6 @@ from orator.migrations import Migration
 
 
 class CreateNotificationsTable(Migration):
-
     def up(self):
         """
         Run the migrations.
@@ -11,7 +10,7 @@ class CreateNotificationsTable(Migration):
             table.increments("id")
             table.string("type")
             table.text("data")
-            table.morphs('notifiable')
+            table.morphs("notifiable")
             table.datetime("read_at").nullable()
             table.timestamps()
 

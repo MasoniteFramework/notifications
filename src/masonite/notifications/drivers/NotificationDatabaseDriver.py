@@ -11,7 +11,6 @@ from ..models import DatabaseNotification
 
 
 class NotificationDatabaseDriver(BaseDriver, NotificationContract):
-
     def __init__(self, app: App):
         """Database Driver Constructor."""
         self.app = app
@@ -33,6 +32,8 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
             "type": notification.notification_type(),
             "notifiable_id": notifiable.id,
             "notifiable_type": notifiable.__class__.get_morph_name(),
-            "data": self.serialize_data(self.get_data("database", notifiable, notification)),
-            "read_at": None
+            "data": self.serialize_data(
+                self.get_data("database", notifiable, notification)
+            ),
+            "read_at": None,
         }

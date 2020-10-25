@@ -6,7 +6,8 @@ import pendulum
 
 class DatabaseNotification(Model):
     """DatabaseNotification Model."""
-    __fillable__ = ['id', 'type', 'data', 'read_at', 'notifiable_id', 'notifiable_type']
+
+    __fillable__ = ["id", "type", "data", "read_at", "notifiable_id", "notifiable_type"]
     __table__ = "notifications"
 
     @morph_to
@@ -17,12 +18,12 @@ class DatabaseNotification(Model):
     def mark_as_read(self):
         """Mark the notification as read."""
         if not self.read_at:
-            self.set_raw_attribute('read_at', pendulum.now())
+            self.set_raw_attribute("read_at", pendulum.now())
 
     def mark_as_unread(self):
         """Mark the notification as unread."""
         if self.read_at:
-            self.set_raw_attribute('read_at', None)
+            self.set_raw_attribute("read_at", None)
 
     @property
     def is_read(self):

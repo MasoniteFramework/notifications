@@ -3,8 +3,8 @@ from .BaseComponent import BaseComponent
 
 
 class MailComponent(BaseComponent):
-    template = ''
-    template_prefix = '/src/masonite/notifications'
+    template = ""
+    template_prefix = "/src/masonite/notifications"
 
     def __init__(self):
         super().__init__()
@@ -14,8 +14,9 @@ class MailComponent(BaseComponent):
             app {masonite.app.App} -- The Masonite container object.
         """
         from wsgi import container
+
         self.app = container
-        self._view = self.app.make('View')
+        self._view = self.app.make("View")
         self._subject = None
         self._from = ""
         self._reply_to = ""
@@ -29,8 +30,9 @@ class MailComponent(BaseComponent):
         Returns:
             self
         """
-        self.template += self._view(self.template_prefix + '/snippets/mail/line',
-                                    {'message': message}).rendered_template
+        self.template += self._view(
+            self.template_prefix + "/snippets/mail/line", {"message": message}
+        ).rendered_template
         return self
 
     def action(self, message, href=None, style=None):
@@ -48,8 +50,10 @@ class MailComponent(BaseComponent):
         """
         if not style:
             style = self.level()
-        self.template += self._view(self.template_prefix + '/snippets/mail/action',
-                                    {'message': message, 'style': style, 'href': href}).rendered_template
+        self.template += self._view(
+            self.template_prefix + "/snippets/mail/action",
+            {"message": message, "style": style, "href": href},
+        ).rendered_template
         return self
 
     def view(self, template, dictionary={}):
@@ -76,8 +80,9 @@ class MailComponent(BaseComponent):
         Returns:
             self
         """
-        self.template += self._view(self.template_prefix + '/snippets/mail/panel',
-                                    {'message': message}).rendered_template
+        self.template += self._view(
+            self.template_prefix + "/snippets/mail/panel", {"message": message}
+        ).rendered_template
         return self
 
     def heading(self, message):
@@ -89,8 +94,9 @@ class MailComponent(BaseComponent):
         Returns:
             self
         """
-        self.template += self._view(self.template_prefix + '/snippets/mail/heading',
-                                    {'message': message}).rendered_template
+        self.template += self._view(
+            self.template_prefix + "/snippets/mail/heading", {"message": message}
+        ).rendered_template
         return self
 
     def subject(self, message):

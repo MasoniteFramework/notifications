@@ -22,13 +22,19 @@ class Notify(object):
         """
         self.app = container
 
-    def send(self, notifiables, notification, channels=[], dry=False, fail_silently=False):
+    def send(
+        self, notifiables, notification, channels=[], dry=False, fail_silently=False
+    ):
         """Send the given notification to the given notifiables."""
         if isinstance(notification, ShouldQueue):
             self.queue_notification(notifiables, notification)
-        return self.send_now(notifiables, notification, dry=dry, fail_silently=fail_silently)
+        return self.send_now(
+            notifiables, notification, dry=dry, fail_silently=fail_silently
+        )
 
-    def send_now(self, notifiables, notification, channels=[], dry=False, fail_silently=False):
+    def send_now(
+        self, notifiables, notification, channels=[], dry=False, fail_silently=False
+    ):
         """Send the given notification to the given notifiables immediately."""
         notifiables = self.prepare_notifiables(notifiables)
         for notifiable in notifiables:
@@ -39,19 +45,40 @@ class Notify(object):
             _channels = self.prepare_channels(_channels)
             for channel in _channels:
                 from .AnonymousNotifiable import AnonymousNotifiable
-                if isinstance(notifiable, AnonymousNotifiable) and channel == "database":
+
+                if (
+                    isinstance(notifiable, AnonymousNotifiable)
+                    and channel == "database"
+                ):
                     continue
                 notification_id = uuid.uuid4()
-                self.send_to_notifiable(notifiable, notification, notification_id, channel, dry=dry, fail_silently=fail_silently)
+                self.send_to_notifiable(
+                    notifiable,
+                    notification,
+                    notification_id,
+                    channel,
+                    dry=dry,
+                    fail_silently=fail_silently,
+                )
 
-    def send_to_notifiable(self, notifiable, notification, notification_id, channel, dry=False, fail_silently=False):
+    def send_to_notifiable(
+        self,
+        notifiable,
+        notification,
+        notification_id,
+        channel,
+        dry=False,
+        fail_silently=False,
+    ):
         """Send the given notification through the given channel to one notifiable."""
         if not notification.id:
             notification.id = notification_id
         if not notification.should_send or dry:
             return
         try:
-            self.app.make("NotificationManager").driver(channel).send(notifiable, notification)
+            self.app.make("NotificationManager").driver(channel).send(
+                notifiable, notification
+            )
         # TODO: should we subclass exception which can occur during sending with NotificationSendingException ?
         # could allow to catch only those ones
         except Exception as e:
@@ -68,7 +95,10 @@ class Notify(object):
 
     def prepare_notifiables(self, notifiables):
         from .AnonymousNotifiable import AnonymousNotifiable
-        if isinstance(notifiables, Model) or isinstance(notifiables, AnonymousNotifiable):
+
+        if isinstance(notifiables, Model) or isinstance(
+            notifiables, AnonymousNotifiable
+        ):
             return [notifiables]
         else:
             # could be a list or a Collection
@@ -93,4 +123,5 @@ class Notify(object):
     def route(self, channel, route):
         """Begin sending a notification to an anonymous notifiable."""
         from .AnonymousNotifiable import AnonymousNotifiable
+
         return AnonymousNotifiable().route(channel, route)

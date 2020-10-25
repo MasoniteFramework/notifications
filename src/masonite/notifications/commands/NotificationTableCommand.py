@@ -12,7 +12,9 @@ class NotificationTableCommand(Command):
     """
 
     def handle(self):
-        migration_path = os.path.join(os.path.dirname(__file__), '../migrations')
-        self.publishes_migrations([
-            os.path.join(migration_path, 'create_notifications_table.py'),
-        ])
+        migration_path = os.path.join(os.path.dirname(__file__), "../migrations")
+        self.publishes_migrations(
+            [
+                os.path.join(migration_path, "create_notifications_table.py"),
+            ]
+        )

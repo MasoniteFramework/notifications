@@ -1,14 +1,11 @@
-
-
 class BaseComponent(object):
-
     def __init__(self, level=""):
         self._level = level
         self._colors = {
             "error": "red",
             "success": "success",
             "warning": "orange",
-            "info": "blue"
+            "info": "blue",
         }
 
     def error(self):
