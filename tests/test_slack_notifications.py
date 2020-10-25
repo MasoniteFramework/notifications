@@ -11,9 +11,9 @@ from src.masonite.notifications.exceptions import (
     SlackInvalidMessage,
 )
 
-
+# fake webhook for tests
 webhook_url = (
-    "https://hooks.slack.com/services/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"
+    "https://hooks.slack.com/services/X/Y/Z"
 )
 
 
@@ -168,28 +168,25 @@ class TestSlackNotifications(TestCase):
         with self.assertRaises(SlackInvalidMessage):
             user.notify(WelcomeNotification())
 
-    # TODO : add other exceptions
-
     # Integration test
-    def test_sending_complex_message_via_webhook(self):
-        user = self.user()
+    # def test_sending_complex_message_via_webhook(self):
+    #     user = self.user()
 
-        def to_slack(self, notifiable):
-            return (
-                SlackComponent()
-                .success()
-                .send_from("test-bot", ":ghost:")
-                .text("Hello @Samuel")
-                .link_names()
-                .unfurl_links()
-            )
-            # .text("Hello: https://slack.com/") \
+    #     def to_slack(self, notifiable):
+    #         return (
+    #             SlackComponent()
+    #             .success()
+    #             .send_from("test-bot", ":ghost:")
+    #             .text("Hello @Samuel")
+    #             .link_names()
+    #             .unfurl_links()
+    #         )
+    #         # .text("Hello: https://slack.com/") \
 
-        WelcomeNotification.to_slack = to_slack
-        user.notify(WelcomeNotification())
+    #     WelcomeNotification.to_slack = to_slack
+    #     user.notify(WelcomeNotification())
 
-    # @unittest.mock.patch('sys.stderr', new_callable=io.StringIO)
-    # def test_sending_to_anonymous(self, mock_stderr):
-    #     self.notification.route("mail", "test@mail.com").notify(CustomNotification())
-    #     self.assertIn('To: test@mail.com', mock_stderr.getvalue())
-    #     self.assertIn('Welcome!', mock_stderr.getvalue())
+    @responses.activate
+    def test_sending_to_anonymous(self):
+        responses.add(responses.POST, webhook_url, body=b"ok")
+        self.notification.route("slack", webhook_url).notify(WelcomeNotification())

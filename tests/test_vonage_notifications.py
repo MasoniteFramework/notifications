@@ -188,3 +188,10 @@ class TestVonageNotifications(TestCase):
             error_message = str(e.exception)
             self.assertIn("Code [12]", error_message)
             self.assertIn("Vonage code message", error_message)
+
+    def test_sending_to_anonymous(self):
+        with patch("vonage.sms.Sms") as MockSmsClass:
+            MockSmsClass.return_value.send_message.return_value = (
+                VonageAPIMock().send_success()
+            )
+            self.notification.route("vonage", "336534231267").notify(WelcomeNotification())
