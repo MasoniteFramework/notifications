@@ -100,7 +100,11 @@ class TestDatabaseNotifications(TestCase):
                          str(err.exception))
 
     def test_database_notification_morph_notifiable(self):
-        user = self.user()
+        class UserNotifiableTest(User, Notifiable):
+            """Notifiable User Test Model"""
+            __table__ = "users"
+
+        user = UserNotifiableTest.where("name", "Joe").get()[0]
         notification = DatabaseNotification.create({
             "id": str(uuid.uuid4()),
             "read_at": pendulum.now(),
@@ -110,7 +114,7 @@ class TestDatabaseNotifications(TestCase):
             "notifiable_type": "users"
         })
         self.assertEqual(user.id, notification.notifiable.id)
-        self.assertEqual(UserTest, notification.notifiable.__class__)
+        self.assertEqual(UserNotifiableTest, notification.notifiable.__class__)
 
     def test_database_notification_read_state(self):
         notification = factory(DatabaseNotification).make(read_at=pendulum.now())
