@@ -151,6 +151,8 @@ class TestNotifyHandler(UserTestCase):
 
         user = self.user()
         user.route_notification_for_slack = lambda n: "webhook_url"
+        slack_send_backup = NotificationSlackDriver.send
+        mail_send_backup = NotificationMailDriver.send
         # mock slack send method call
         NotificationSlackDriver.send = MagicMock(return_value="slack")
         NotificationMailDriver.send = MagicMock(return_value="mail")
@@ -158,6 +160,8 @@ class TestNotifyHandler(UserTestCase):
 
         NotificationSlackDriver.send.assert_called()
         NotificationMailDriver.send.assert_not_called()
+        NotificationSlackDriver.send = slack_send_backup
+        NotificationMailDriver.send = mail_send_backup
 
     def test_that_channels_can_be_overriden_at_send_with_notification_interface(self):
         class WelcomeNotification(Notification):
@@ -172,6 +176,9 @@ class TestNotifyHandler(UserTestCase):
 
         user = self.user()
         user.route_notification_for_slack = lambda n: "webhook_url"
+        # allow to revert driver to original version to avoid affecting other tests
+        slack_send_backup = NotificationSlackDriver.send
+        mail_send_backup = NotificationMailDriver.send
         # mock slack send method call
         NotificationSlackDriver.send = MagicMock(return_value="slack")
         NotificationMailDriver.send = MagicMock(return_value="mail")
@@ -179,6 +186,8 @@ class TestNotifyHandler(UserTestCase):
 
         NotificationSlackDriver.send.assert_called()
         NotificationMailDriver.send.assert_not_called()
+        NotificationSlackDriver.send = slack_send_backup
+        NotificationMailDriver.send = mail_send_backup
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     @responses.activate
