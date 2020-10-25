@@ -1,7 +1,3 @@
-import io
-import sys
-import unittest
-import unittest.mock
 from masonite.testing import TestCase
 
 from src.masonite.notifications import Notification, Notify
@@ -37,3 +33,10 @@ class TestNotificationClass(TestCase):
         self.assertEqual(
             "WelcomeNotification", WelcomeNotification().notification_type()
         )
+
+    def test_that_via_should_be_implemented(self):
+        class WelcomeNotification(Notification):
+            pass
+
+        with self.assertRaises(TypeError):
+            WelcomeNotification()

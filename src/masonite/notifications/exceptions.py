@@ -11,6 +11,10 @@ class NotificationFormatError(Exception):
     pass
 
 
+class NotificationChannelsNotDefined(Exception):
+    pass
+
+
 # Database driver exceptions
 
 # Broadcast driver exceptions

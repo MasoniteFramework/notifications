@@ -1,6 +1,7 @@
 import io
 import unittest
 import unittest.mock
+from unittest.mock import MagicMock
 import responses
 from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
@@ -12,7 +13,14 @@ from src.masonite.notifications.components import (
     SlackComponent,
     VonageComponent,
 )
-
+from src.masonite.notifications.drivers import (
+    NotificationSlackDriver,
+    NotificationMailDriver,
+)
+from src.masonite.notifications.exceptions import (
+    InvalidNotificationType,
+    NotificationChannelsNotDefined,
+)
 
 webhook_url = "https://hooks.slack.com/services/X/Y"
 
@@ -103,6 +111,74 @@ class TestNotifyHandler(UserTestCase):
         user = self.user()
         self.notification.send(user, FailingNotification(), fail_silently=True)
         # no exception raised
+
+    def test_invalid_notification_driver_in_via_raises_error(self):
+        class FailingNotification(Notification):
+            def via(self, notifiable):
+                return ["incorrect_driver"]
+
+        user = self.user()
+        with self.assertRaises(InvalidNotificationType) as e:
+            user.notify(FailingNotification())
+        self.assertIn(
+            "incorrect_driver notification driver has not been found in the container",
+            str(e.exception),
+        )
+
+    def test_that_empty_via_raises_an_error(self):
+        class FailingNotification(Notification):
+            def via(self, notifiable):
+                return []
+
+        user = self.user()
+        with self.assertRaises(NotificationChannelsNotDefined) as e:
+            user.notify(FailingNotification())
+        self.assertIn(
+            "via() method of FailingNotification class.",
+            str(e.exception),
+        )
+
+    def test_that_channels_can_be_overriden_at_send(self):
+        class WelcomeNotification(Notification):
+            def to_mail(self, notifiable):
+                return "mail"
+
+            def to_slack(self, notifiable):
+                return "slack"
+
+            def via(self):
+                return ["mail"]
+
+        user = self.user()
+        user.route_notification_for_slack = lambda n: "webhook_url"
+        # mock slack send method call
+        NotificationSlackDriver.send = MagicMock(return_value="slack")
+        NotificationMailDriver.send = MagicMock(return_value="mail")
+        user.notify(WelcomeNotification(), channels=["slack"])
+
+        NotificationSlackDriver.send.assert_called()
+        NotificationMailDriver.send.assert_not_called()
+
+    def test_that_channels_can_be_overriden_at_send_with_notification_interface(self):
+        class WelcomeNotification(Notification):
+            def to_mail(self, notifiable):
+                return "mail"
+
+            def to_slack(self, notifiable):
+                return "slack"
+
+            def via(self):
+                return ["mail"]
+
+        user = self.user()
+        user.route_notification_for_slack = lambda n: "webhook_url"
+        # mock slack send method call
+        NotificationSlackDriver.send = MagicMock(return_value="slack")
+        NotificationMailDriver.send = MagicMock(return_value="mail")
+        self.notification.send(user, WelcomeNotification(), channels=["slack"])
+
+        NotificationSlackDriver.send.assert_called()
+        NotificationMailDriver.send.assert_not_called()
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     @responses.activate

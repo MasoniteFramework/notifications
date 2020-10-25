@@ -10,7 +10,7 @@ class Notifiable(object):
         from wsgi import container
 
         return Notify(container).send(
-            self, notification, channels=[], dry=dry, fail_silently=fail_silently
+            self, notification, channels, dry, fail_silently
         )
 
     def notify_now(self, notification, channels=[], dry=False, fail_silently=False):

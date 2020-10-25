@@ -6,7 +6,7 @@ from masonite.queues import ShouldQueue
 from config.database import Model
 
 from .NotificationContract import NotificationContract
-from .exceptions import InvalidNotificationType
+from .exceptions import InvalidNotificationType, NotificationChannelsNotDefined
 
 
 class Notify(object):
@@ -30,7 +30,7 @@ class Notify(object):
         if isinstance(notification, ShouldQueue):
             self.queue_notification(notifiables, notification)
         return self.send_now(
-            notifiables, notification, dry=dry, fail_silently=fail_silently
+            notifiables, notification, channels, dry, fail_silently
         )
 
     def send_now(
@@ -40,9 +40,13 @@ class Notify(object):
         notifiables = self.prepare_notifiables(notifiables)
         for notifiable in notifiables:
             # get channels for this notification
-            legacy_channels = notification.via(notifiable)
-            _channels = legacy_channels if legacy_channels else channels
+            # allow override of channels list at send
+            _channels = channels if channels else notification.via(notifiable)
             _channels = self.prepare_channels(_channels)
+            if not _channels:
+                raise NotificationChannelsNotDefined(
+                    "No channels have been defined in via() method of {0} class.".format(notification.notification_type())
+                )
             for channel in _channels:
                 from .AnonymousNotifiable import AnonymousNotifiable
 
