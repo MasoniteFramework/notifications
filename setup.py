@@ -18,7 +18,8 @@ setup(
     ],
     version='3.0.0',
     install_requires=[
-        "masonite==3.0.1b0",
+        # TODO: when 3.0 officially released put it here
+        # "masonite==3.0.0b1",
     ],
     description='Masonite Notifications Package',
     long_description=long_description,
