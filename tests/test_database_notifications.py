@@ -3,8 +3,9 @@ import unittest
 import unittest.mock
 import uuid
 from masonite.testing import TestCase
+from masoniteorm.models import Model
 
-from app.User import User
+# from app.User import User
 from src.masonite.notifications import (
     Notifiable,
     Notification,
@@ -15,10 +16,18 @@ from src.masonite.notifications.drivers import NotificationDatabaseDriver
 import pendulum
 
 
-class UserTest(User, Notifiable):
-    """Notifiable User Test Model"""
+# class UserTest(User, Notifiable):
+#     """Notifiable User Test Model"""
 
-    __table__ = "users"
+#     __table__ = "users"
+
+class User(Model, Notifiable):
+    """User Model"""
+
+    __fillable__ = ["name", "email", "password"]
+
+    def route_notification_for_slack(self, notifiable):
+        return "#channel-{}".format(self.name.lower())
 
 
 def to_database(self, notifiable):
@@ -47,12 +56,12 @@ class TestDatabaseNotifications(TestCase):
             n.delete()
 
     def setUpFactories(self):
-        UserTest.create(
+        User.create(
             {"name": "Joe", "email": "user@example.com", "password": "secret"}
         )
 
     def user(self):
-        return UserTest.where("name", "Joe").get()[0]
+        return User.where("name", "Joe").get()[0]
 
     def test_sending_notification_to_user(self):
         user = self.user()

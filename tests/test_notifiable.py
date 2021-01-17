@@ -30,8 +30,6 @@ class User(Model, Notifiable):
     def route_notification_for_slack(self, notifiable):
         return "#channel-{}".format(self.name.lower())
 
-morph_to.set_morph_map({"user": User})
-
 
 class TestNotifiable(TestCase):
     def setUp(self):
@@ -47,9 +45,9 @@ class TestNotifiable(TestCase):
 
     def test_user_as_notifiable_entity(self):
         user = self.user()
-        self.assertEqual([], user.notifications())
-        self.assertEqual([], user.read_notifications())
-        self.assertEqual([], user.unread_notifications())
+        self.assertEqual(0, user.notifications.count())
+        self.assertEqual(0, user.read_notifications().count())
+        self.assertEqual(0, user.unread_notifications().count())
         self.assertTrue(callable(user.notify))
         self.assertTrue(callable(user.notify_now))
 

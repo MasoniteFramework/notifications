@@ -10,7 +10,7 @@ class DatabaseNotification(Model):
     __fillable__ = ["id", "type", "data", "read_at", "notifiable_id", "notifiable_type"]
     __table__ = "notifications"
 
-    # @morph_to("", "")
+    @morph_to("notifiable_type", "notifiable_id")
     def notifiable(self):
         """Get the notifiable entity that the notification belongs to."""
         return

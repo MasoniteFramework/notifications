@@ -1,7 +1,8 @@
 """Notifiable mixin"""
+from src.masonite.notifications.models.DatabaseNotification import DatabaseNotification
 from .Notify import Notify
 from .exceptions import NotificationRouteNotImplemented
-from masoniteorm.relationships import morph_to
+from masoniteorm.relationships import has_many
 
 
 class Notifiable(object):
@@ -49,10 +50,13 @@ class Notifiable(object):
     #     from .models import DatabaseNotification
     #     return DatabaseNotification
 
-    @morph_to("notifiable", "notifiable_id")
-    def notifications(self):
-        return self
+    # @morph_to("notifiable", "notifiable_id")
+    # def notifications(self):
+    #     return self
 
+    @has_many('id', 'notifiable_id')  # user id -> notifiable id === user id but in notifs table
+    def notifications(self):
+        return DatabaseNotification.where('notifiable_type', 'User')
 
     # def notifications(self):
     #     """Get the entity's notifications. Only for 'database'
@@ -68,16 +72,9 @@ class Notifiable(object):
     def unread_notifications(self):
         """Get the entity's unread notifications. Only for 'database'
         notifications."""
-        return self.notifications().where("read_at", None)
+        return self.notifications.where("read_at", "==", None)
 
     def read_notifications(self):
         """Get the entity's read notifications. Only for 'database'
         notifications."""
-        from .models import DatabaseNotification
-
-        return (
-            DatabaseNotification.where("notifiable_id", self.id)
-            .where("read_at", "!=", "")
-            .order_by("created_at")
-            .get()
-        )
+        return self.notifications.where("read_at", "!=", None)
