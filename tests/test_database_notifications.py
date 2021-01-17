@@ -4,6 +4,7 @@ import unittest.mock
 import uuid
 from masonite.testing import TestCase
 from masoniteorm.models import Model
+from masoniteorm.relationships import morph_to
 
 # from app.User import User
 from src.masonite.notifications import (
@@ -40,6 +41,9 @@ class WelcomeNotification(Notification):
 
     def via(self, notifiable):
         return ["database"]
+
+
+# morph_to.set_morph_map({"user": User})
 
 
 class TestDatabaseNotifications(TestCase):
@@ -109,7 +113,7 @@ class TestDatabaseNotifications(TestCase):
         notification = DatabaseNotification.create(
             {
                 "id": str(uuid.uuid4()),
-                "read_at": pendulum.now(),
+                "read_at": pendulum.now().to_datetime_string(),
                 "type": "test",
                 "data": "{}",
                 "notifiable_id": user.id,
@@ -143,9 +147,9 @@ class TestDatabaseNotifications(TestCase):
 
     def test_notifiable_get_notifications(self):
         user = self.user()
-        self.assertEqual(0, user.notifications().count())
+        self.assertEqual(0, user.notifications.count())
         user.notify(WelcomeNotification())
-        self.assertEqual(1, user.notifications().count())
+        self.assertEqual(1, user.notifications.count())
 
     def test_notifiable_get_read_notifications(self):
         user = self.user()
@@ -156,6 +160,7 @@ class TestDatabaseNotifications(TestCase):
                 "read_at": pendulum.now(),
                 "type": "test",
                 "data": "{}",
+                "read_at": None,
                 "notifiable_id": user.id,
                 "notifiable_type": "users",
             }
@@ -170,6 +175,7 @@ class TestDatabaseNotifications(TestCase):
                 "id": str(uuid.uuid4()),
                 "type": "test",
                 "data": "{}",
+                "read_at": None,
                 "notifiable_id": user.id,
                 "notifiable_type": "users",
             }

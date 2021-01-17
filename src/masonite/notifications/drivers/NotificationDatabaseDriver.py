@@ -5,7 +5,7 @@ from masonite import Queue, Broadcast
 from masonite.helpers import config
 from masonite.queues import ShouldQueue
 from masonite.drivers import BaseDriver
-
+from masoniteorm.relationships import morph_to
 from ..NotificationContract import NotificationContract
 from ..models import DatabaseNotification
 
@@ -31,7 +31,9 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
             "id": str(notification.id),
             "type": notification.notification_type(),
             "notifiable_id": notifiable.id,
-            "notifiable_type": notifiable.__class__.get_morph_name(),
+            # TODO: here we should fetch notifiable morph type
+            # #notifiable.__class__.get_morph_name(),
+            "notifiable_type": notifiable.get_table_name(),
             "data": self.serialize_data(
                 self.get_data("database", notifiable, notification)
             ),
