@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 from .UserTestCase import UserTestCase
 from src.masonite.notifications import Notification, NotificationContract
+from src.masonite.notifications.components import MailComponent
 from src.masonite.notifications.exceptions import InvalidNotificationType
 
 

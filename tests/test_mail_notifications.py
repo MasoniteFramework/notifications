@@ -4,7 +4,7 @@ import unittest.mock
 from masonite.testing import TestCase
 from masonite.drivers import Mailable
 
-from config.database import Model
+from masoniteorm.models import Model
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.components import MailComponent
 
@@ -49,6 +49,7 @@ class CustomNotification(Notification):
 
 
 class TestMailNotifications(TestCase):
+    sqlite = False
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

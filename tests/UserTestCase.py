@@ -1,6 +1,6 @@
 from masonite.testing import TestCase
 
-from config.database import Model
+from masoniteorm.models import Model
 from src.masonite.notifications import Notify, Notification, Notifiable
 from src.masonite.notifications.components import MailComponent
 
@@ -24,6 +24,8 @@ class WelcomeNotification(Notification):
 
 
 class UserTestCase(TestCase):
+    # sqlite =
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

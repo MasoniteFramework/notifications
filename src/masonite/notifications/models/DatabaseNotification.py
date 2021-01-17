@@ -1,6 +1,6 @@
 """DatabaseNotification Model."""
-from orator.orm import morph_to
-from config.database import Model
+from masoniteorm.relationships import morph_to
+from masoniteorm.models import Model
 import pendulum
 
 
@@ -10,7 +10,7 @@ class DatabaseNotification(Model):
     __fillable__ = ["id", "type", "data", "read_at", "notifiable_id", "notifiable_type"]
     __table__ = "notifications"
 
-    @morph_to
+    # @morph_to("", "")
     def notifiable(self):
         """Get the notifiable entity that the notification belongs to."""
         return

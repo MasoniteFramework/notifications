@@ -1,7 +1,7 @@
 import responses
 from masonite.testing import TestCase
 
-from config.database import Model
+from masoniteorm.models import Model
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.components import SlackComponent
 from src.masonite.notifications.exceptions import (
@@ -39,6 +39,7 @@ class WelcomeNotification(Notification):
 
 
 class TestSlackNotifications(TestCase):
+    sqlite = False
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

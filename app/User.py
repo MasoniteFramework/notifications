@@ -1,9 +1,10 @@
-""" User Model """
-from config.database import Model
+"""User Model."""
+
+from masoniteorm.models import Model
 
 
 class User(Model):
-    """User Model"""
+    """User Model."""
 
     __fillable__ = ['name', 'email', 'password']
 

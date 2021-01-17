@@ -24,7 +24,6 @@ class WelcomeNotification(Notification):
 
 class TestCustomClass(UserTestCase):
     """Test that custom notifications classes can be used in an application."""
-
     def test_sending(self):
         user = self.user()
         notification = WelcomeNotification()

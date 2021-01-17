@@ -1,7 +1,7 @@
 """Notifiable mixin"""
-from orator.orm import morph_many
 from .Notify import Notify
 from .exceptions import NotificationRouteNotImplemented
+from masoniteorm.relationships import morph_to
 
 
 class Notifiable(object):
@@ -49,16 +49,21 @@ class Notifiable(object):
     #     from .models import DatabaseNotification
     #     return DatabaseNotification
 
+    @morph_to("notifiable", "notifiable_id")
     def notifications(self):
-        """Get the entity's notifications. Only for 'database'
-        notifications."""
-        from .models import DatabaseNotification
+        return self
 
-        return (
-            DatabaseNotification.where("notifiable_id", self.id)
-            .order_by("created_at")
-            .get()
-        )
+
+    # def notifications(self):
+    #     """Get the entity's notifications. Only for 'database'
+    #     notifications."""
+    #     from .models import DatabaseNotification
+
+    #     return (
+    #         DatabaseNotification.where("notifiable_id", self.id)
+    #         .order_by("created_at")
+    #         .get()
+    #     )
 
     def unread_notifications(self):
         """Get the entity's unread notifications. Only for 'database'

@@ -3,7 +3,7 @@ import uuid
 from masonite.app import App
 from masonite.exceptions import DriverNotFound
 from masonite.queues import ShouldQueue
-from config.database import Model
+from masoniteorm.models import Model
 
 from .NotificationContract import NotificationContract
 from .exceptions import InvalidNotificationType, NotificationChannelsNotDefined

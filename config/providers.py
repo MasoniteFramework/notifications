@@ -2,6 +2,7 @@
 
 from masonite.providers import (
     AppProvider,
+    RequestHelpersProvider,
     SessionProvider,
     RouteProvider,
     StatusCodeProvider,
@@ -29,6 +30,7 @@ from src.masonite.notifications.providers import NotificationProvider
 PROVIDERS = [
     # Framework Providers
     AppProvider,
+    RequestHelpersProvider,
     SessionProvider,
     RouteProvider,
     StatusCodeProvider,

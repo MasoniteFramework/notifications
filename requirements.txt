@@ -1,4 +1,1 @@
-# TODO: to clean when official release of Masonite 3.0
-git+https://github.com/MasoniteFramework/masonite.git@3.0
-# just to force pip install to install pre-release packages
-masonite-orm==0.7.1b0
+masonite>=3.0<4

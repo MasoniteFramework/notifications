@@ -2,7 +2,8 @@ import io
 import unittest
 import unittest.mock
 from masonite.testing import TestCase
-from config.database import Model
+from masoniteorm.models import Model
+from masoniteorm.relationships import morph_to
 
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.components import MailComponent
@@ -28,6 +29,8 @@ class User(Model, Notifiable):
 
     def route_notification_for_slack(self, notifiable):
         return "#channel-{}".format(self.name.lower())
+
+morph_to.set_morph_map({"user": User})
 
 
 class TestNotifiable(TestCase):

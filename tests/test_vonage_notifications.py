@@ -1,9 +1,6 @@
-import responses
-
-# import mock
 from unittest.mock import patch
 from masonite.testing import TestCase
-from config.database import Model
+from masoniteorm.models import Model
 
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.components import VonageComponent
@@ -45,6 +42,8 @@ class VonageAPIMock(object):
 
 
 class TestVonageNotifications(TestCase):
+    sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
@@ -194,4 +193,6 @@ class TestVonageNotifications(TestCase):
             MockSmsClass.return_value.send_message.return_value = (
                 VonageAPIMock().send_success()
             )
-            self.notification.route("vonage", "336534231267").notify(WelcomeNotification())
+            self.notification.route("vonage", "336534231267").notify(
+                WelcomeNotification()
+            )

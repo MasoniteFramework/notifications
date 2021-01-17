@@ -2,10 +2,7 @@ import io
 import unittest
 import unittest.mock
 import uuid
-from orator.orm import Factory
 from masonite.testing import TestCase
-from masonite.drivers import Mailable, BroadcastPusherDriver
-from masonite.managers import BroadcastManager
 
 from app.User import User
 from src.masonite.notifications import (
@@ -36,22 +33,9 @@ class WelcomeNotification(Notification):
         return ["database"]
 
 
-factory = Factory()
-
-
-@factory.define(DatabaseNotification)
-def db_notification_factory(faker):
-    return {
-        "id": str(uuid.uuid4()),
-        "type": "test",
-        "read_at": None,
-        "notifiable_id": 1,
-        "notifiable_type": "users",
-        "data": "{}",
-    }
-
-
 class TestDatabaseNotifications(TestCase):
+    sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

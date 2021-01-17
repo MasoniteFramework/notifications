@@ -5,7 +5,7 @@ from masonite.testing import TestCase
 from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
-from config.database import Model
+from masoniteorm.models import Model
 from src.masonite.notifications import Notifiable, Notification, Notify
 from src.masonite.notifications.drivers import NotificationBroadcastDriver
 from src.masonite.notifications.exceptions import BroadcastOnNotImplemented
@@ -30,6 +30,8 @@ class WelcomeNotification(Notification):
 
 
 class TestBroadcastNotifications(TestCase):
+    sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

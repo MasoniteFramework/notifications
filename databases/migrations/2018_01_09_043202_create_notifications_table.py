@@ -1,4 +1,4 @@
-from orator.migrations import Migration
+from masoniteorm.migrations import Migration
 
 
 class CreateNotificationsTable(Migration):
@@ -8,6 +8,7 @@ class CreateNotificationsTable(Migration):
         Run the migrations.
         """
         with self.schema.create("notifications") as table:
+            # TODO: use UUID column with UUID mixin maybe ?
             table.string("id", 36).primary()
             table.string("type")
             table.text("data")
