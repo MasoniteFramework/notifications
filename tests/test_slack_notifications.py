@@ -12,9 +12,7 @@ from src.masonite.notifications.exceptions import (
 )
 
 # fake webhook for tests
-webhook_url = (
-    "https://hooks.slack.com/services/X/Y/Z"
-)
+webhook_url = "https://hooks.slack.com/services/X/Y/Z"
 
 
 class User(Model, Notifiable):
@@ -40,6 +38,7 @@ class WelcomeNotification(Notification):
 
 class TestSlackNotifications(TestCase):
     sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)

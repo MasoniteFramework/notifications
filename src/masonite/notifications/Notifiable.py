@@ -1,8 +1,9 @@
 """Notifiable mixin"""
+from masoniteorm.relationships import has_many
+
 from src.masonite.notifications.models.DatabaseNotification import DatabaseNotification
 from .Notify import Notify
 from .exceptions import NotificationRouteNotImplemented
-from masoniteorm.relationships import has_many
 
 
 class Notifiable(object):
@@ -10,9 +11,7 @@ class Notifiable(object):
         """Send the given notification."""
         from wsgi import container
 
-        return Notify(container).send(
-            self, notification, channels, dry, fail_silently
-        )
+        return Notify(container).send(self, notification, channels, dry, fail_silently)
 
     def notify_now(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification immediately."""
@@ -33,7 +32,7 @@ class Notifiable(object):
         except AttributeError:
             # if no method is defined on notifiable use default
             if channel == "database":
-                # TODO: check how to handle this later
+                # with database channel, notifications are saved to database
                 pass
             elif channel == "mail":
                 return self.email
@@ -42,32 +41,12 @@ class Notifiable(object):
                     "Notifiable model does not implement {}".format(method_name)
                 )
 
-    # TODO: this does not work it returns empty
-    # @morph_many('notifiable')
-    # def notifications(self):
-    #     """Get the entity's notifications. Only for 'database'
-    #     notifications."""
-    #     from .models import DatabaseNotification
-    #     return DatabaseNotification
-
-    # @morph_to("notifiable", "notifiable_id")
-    # def notifications(self):
-    #     return self
-
-    @has_many('id', 'notifiable_id')  # user id -> notifiable id === user id but in notifs table
+    @has_many("id", "notifiable_id")
     def notifications(self):
-        return DatabaseNotification.where('notifiable_type', 'users')
+        return DatabaseNotification.where("notifiable_type", "users").order_by(
+            "created_at", direction="DESC"
+        )
 
-    # def notifications(self):
-    #     """Get the entity's notifications. Only for 'database'
-    #     notifications."""
-    #     from .models import DatabaseNotification
-
-    #     return (
-    #         DatabaseNotification.where("notifiable_id", self.id)
-    #         .order_by("created_at")
-    #         .get()
-    #     )
     @property
     def unread_notifications(self):
         """Get the entity's unread notifications. Only for 'database'

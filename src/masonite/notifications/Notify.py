@@ -90,7 +90,7 @@ class Notify(object):
             else:
                 raise e
 
-        # TODO: dispatch send event
+        # TODO (later): dispatch send event
 
     def queue_notification(self, notifiables, notification):
         """Queue the given notification."""

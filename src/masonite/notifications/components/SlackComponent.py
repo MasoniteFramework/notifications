@@ -1,5 +1,4 @@
 """Slack Component Class"""
-import requests
 from .BaseComponent import BaseComponent
 
 from ..exceptions import NotificationFormatError
@@ -93,7 +92,6 @@ class SlackComponent(BaseComponent):
         return self
 
     def as_dict(self):
-        # TODO: find a Pythonic to build a dict of defined optional fields
         optional_fields = {
             "icon_emoji": self._icon_emoji,
             # "icon_url"
@@ -111,12 +109,7 @@ class SlackComponent(BaseComponent):
         }
 
     def attachment_as_dict(self):
-        # TODO: add support for attachments
-        # return {
-        #     "color": self.color(),
-        #     "text": self._text
-        #     # TODO:
-        # }
+        # TODO (later): add support for attachments
         return {
             "fallback": "Nouvelle tâche ouverte [Urgent]: <http://url_to_task|Tester les pièces jointes de message de Slack>",
             "pretext": "Nouvelle tâche ouverte [Urgent]: <http://url_to_task|Tester les pièces jointes de message de Slack>",
@@ -297,28 +290,28 @@ class SlackComponent(BaseComponent):
         #     pass
 
         # def find_channel(self, name):
-        """Calls the Slack API to find the channel name.
+        # """Calls the Slack API to find the channel name.
 
-        This is so we do not have to specify the channel ID's. Slack requires channel ID's
-        to be used.
+        # This is so we do not have to specify the channel ID's. Slack requires channel ID's
+        # to be used.
 
-        Arguments:
-            name {string} -- The channel name to find.
+        # Arguments:
+        #     name {string} -- The channel name to find.
 
-        Raises:
-            SlackChannelNotFound -- Thrown if the channel name is not found.
+        # Raises:
+        #     SlackChannelNotFound -- Thrown if the channel name is not found.
 
-        Returns:
-            self
-        """
-        if self._run:
-            response = requests.post(
-                "https://slack.com/api/channels.list", {"token": self._token}
-            )
-            for channel in response.json()["channels"]:
-                if channel["name"] == name.split("#")[1]:
-                    return channel["id"]
+        # Returns:
+        #     self
+        # """
+        # if self._run:
+        #     response = requests.post(
+        #         "https://slack.com/api/channels.list", {"token": self._token}
+        #     )
+        #     for channel in response.json()["channels"]:
+        #         if channel["name"] == name.split("#")[1]:
+        #             return channel["id"]
 
-            raise SlackChannelNotFound("Could not find the {} channel".format(name))
-        else:
-            return "TEST_ID"
+        #     raise SlackChannelNotFound("Could not find the {} channel".format(name))
+        # else:
+        #     return "TEST_ID"

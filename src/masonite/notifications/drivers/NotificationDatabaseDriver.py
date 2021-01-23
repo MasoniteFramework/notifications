@@ -31,8 +31,6 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
             "id": str(notification.id),
             "type": notification.notification_type(),
             "notifiable_id": notifiable.id,
-            # TODO: here we should fetch notifiable morph type
-            # #notifiable.__class__.get_morph_name(),
             "notifiable_type": notifiable.get_table_name(),
             "data": self.serialize_data(
                 self.get_data("database", notifiable, notification)

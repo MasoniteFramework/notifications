@@ -155,9 +155,6 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
                 "The Slack workspace is no longer active or is missing or invalid."
             )
 
-    # def serialize_data(self, data):
-    #     return json.dumps(data)
-
     # def build_payload(self, notifiable, notification):
     #     # TODO: if notifiable is not instance of Model it won't work ...
     #     # TODO: if notifiable PK is not integer it won't work ...

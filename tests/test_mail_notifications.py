@@ -50,6 +50,7 @@ class CustomNotification(Notification):
 
 class TestMailNotifications(TestCase):
     sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
@@ -162,14 +163,6 @@ class TestMailNotifications(TestCase):
         CustomNotification.to_mail = to_mail
         user.notify(CustomNotification())
         self.assertIn("Reply-To: ['support@masonite.com']", mock_stderr.getvalue())
-
-        # TODO: not possible for now in Masonite:
-        # Mail driver does not support naming reply-to addresses
-        # def to_mail(self, notifiable):
-        #     return MailComponent().reply_to("support@masonite.com", "Masonite Support")
-        # CustomNotification.to_mail = to_mail
-        # user.notify(CustomNotification())
-        # self.assertIn('Reply-To: "Masonite Support" <support@masonite.com>', mock_stderr.getvalue())
 
         def to_mail(self, notifiable):
             return MailComponent().reply_to(["joe@masonite.com", "john@masonite.com"])
