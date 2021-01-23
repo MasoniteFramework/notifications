@@ -39,7 +39,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
         # data can be a MailComponent or a Mailable
         driver_instance = self.get_mail_driver()
         if isinstance(data, Mailable):
-            return driver_instance.mailable(data).to(recipients).send, None
+            return driver_instance.mailable(data).to(recipients).send, ()
         else:
             mail = driver_instance.to(recipients).subject(data._subject)
             reply_to_recipients = self.get_reply_to_recipients(data._reply_to)

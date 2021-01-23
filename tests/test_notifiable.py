@@ -68,6 +68,7 @@ class TestNotifiable(TestCase):
 
         # send to multiple notifiables
         users = User.all()
+        import pdb; pdb.set_trace()
         self.notification.send(users, WelcomeNotification())
         printed_email = mock_stderr.getvalue()
         self.assertIn("user@example.com", printed_email)

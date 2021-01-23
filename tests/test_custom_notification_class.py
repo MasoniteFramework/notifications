@@ -12,9 +12,12 @@ class NotificationVoiceClass(NotificationContract):
     def send(self, notifiable, notification):
         pass
 
+    def queue(self, notifiable, notification):
+        pass
 
-# the custom class should implements send(notifiable, notification)
+# the custom class should implements send and queue
 NotificationVoiceClass.send = MagicMock(return_value=True)
+NotificationVoiceClass.queue = MagicMock(return_value=True)
 
 
 class WelcomeNotification(Notification):
