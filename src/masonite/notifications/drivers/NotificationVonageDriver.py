@@ -39,6 +39,11 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
             responses.append(response)
         return responses
 
+    def queue(self, notifiable, notification):
+        """Used to queue the SMS notification to be send."""
+        # TODO:
+        pass
+
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
         It can be one or a list of phone numbers.

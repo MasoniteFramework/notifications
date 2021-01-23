@@ -32,13 +32,18 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
         self._debug = True
 
     def send(self, notifiable, notification):
-        """Used to send the email and run the logic for sending emails."""
+        """Used to send the notification to slack."""
         data = self.get_data("slack", notifiable, notification)
         recipients = self.get_recipients(notifiable, notification)
         if self.sending_mode == self.WEBHOOK_MODE:
             self.send_via_webhook(data, recipients)
         else:
             self.send_via_api(data, recipients)
+
+    def queue(self, notifiable, notification):
+        """Used to queue the notification to be send to slack."""
+        # TODO:
+        pass
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.

@@ -20,6 +20,11 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
         model_data = self.build_payload(notifiable, notification)
         return DatabaseNotification.create(model_data)
 
+    def queue(self, notifiable, notification):
+        """Used to queue the database notification creation."""
+        # TODO:
+        pass
+
     def serialize_data(self, data):
         return json.dumps(data)
 

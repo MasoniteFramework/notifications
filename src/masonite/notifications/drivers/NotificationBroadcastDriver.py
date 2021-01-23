@@ -30,12 +30,17 @@ class NotificationBroadcastDriver(BaseDriver, NotificationContract):
         return self
 
     def send(self, notifiable, notification):
-        """Used to send the email and run the logic for sending emails."""
+        """Used to broadcast a notification."""
         data = self.get_data("broadcast", notifiable, notification)
         driver_instance = self.get_broadcast_driver()
         channels = self.broadcast_on(notifiable, notification)
         for channel in channels:
             driver_instance.channel(channel, data)
+
+    def queue(self, notifiable, notification):
+        """Used to queue the notification to be broadcasted."""
+        # TODO:
+        pass
 
     def get_broadcast_driver(self):
         """Shortcut method to get given broadcast driver instance."""

@@ -13,8 +13,13 @@ class NotificationVoiceDriver(BaseDriver, NotificationContract):
     def send(self, notifiable, notification):
         pass
 
-# the custom class should implements send(notifiable, notification)
+    def queue(self, notifiable, notification):
+        pass
+
+
+# the custom class should implements send and queue
 NotificationVoiceDriver.send = MagicMock(return_value=True)
+NotificationVoiceDriver.queue = MagicMock(return_value=True)
 
 
 class WelcomeNotification(Notification):

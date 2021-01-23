@@ -22,13 +22,12 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
 
     def send(self, notifiable, notification):
         """Used to send the email."""
-        method, args = self._prepare_email_to_send(notifiable, notification)
-        return method(args)
+        method, method_args = self._prepare_email_to_send(notifiable, notification)
+        return method(*method_args)
 
     def queue(self, notifiable, notification):
         """Used to queue the email to send."""
         method, args = self._prepare_email_to_send(notifiable, notification)
-        import pdb; pdb.set_trace()
         return self.app.make(Queue).push(method, args=args)
 
     def _prepare_email_to_send(self, notifiable, notification):
