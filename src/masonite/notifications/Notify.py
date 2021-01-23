@@ -26,16 +26,6 @@ class Notify(object):
     def send(
         self, notifiables, notification, channels=[], dry=False, fail_silently=False
     ):
-        """Send the given notification to the given notifiables."""
-        if isinstance(notification, ShouldQueue):
-            self.queue_notification(notifiables, notification)
-        return self.send_now(
-            notifiables, notification, channels, dry, fail_silently
-        )
-
-    def send_now(
-        self, notifiables, notification, channels=[], dry=False, fail_silently=False
-    ):
         """Send the given notification to the given notifiables immediately."""
         notifiables = self.prepare_notifiables(notifiables)
         for notifiable in notifiables:
@@ -45,7 +35,9 @@ class Notify(object):
             _channels = self.prepare_channels(_channels)
             if not _channels:
                 raise NotificationChannelsNotDefined(
-                    "No channels have been defined in via() method of {0} class.".format(notification.notification_type())
+                    "No channels have been defined in via() method of {0} class.".format(
+                        notification.notification_type()
+                    )
                 )
             for channel in _channels:
                 from .AnonymousNotifiable import AnonymousNotifiable
@@ -56,7 +48,7 @@ class Notify(object):
                 ):
                     continue
                 notification_id = uuid.uuid4()
-                self.send_to_notifiable(
+                return self.send_or_queue(
                     notifiable,
                     notification,
                     notification_id,
@@ -68,7 +60,7 @@ class Notify(object):
     def is_custom_channel(self, channel):
         return issubclass(channel, NotificationContract)
 
-    def send_to_notifiable(
+    def send_or_queue(
         self,
         notifiable,
         notification,
@@ -77,13 +69,16 @@ class Notify(object):
         dry=False,
         fail_silently=False,
     ):
-        """Send the given notification through the given channel to one notifiable."""
+        """Send or queue the given notification through the given channel to one notifiable."""
         if not notification.id:
             notification.id = notification_id
         if not notification.should_send or dry:
             return
         try:
-            channel_instance.send(notifiable, notification)
+            if isinstance(notification, ShouldQueue):
+                return channel_instance.queue(notifiable, notification)
+            else:
+                return channel_instance.send(notifiable, notification)
         except Exception as e:
             if notification.ignore_errors or fail_silently:
                 pass
@@ -91,10 +86,6 @@ class Notify(object):
                 raise e
 
         # TODO (later): dispatch send event
-
-    def queue_notification(self, notifiables, notification):
-        """Queue the given notification."""
-        pass
 
     def prepare_notifiables(self, notifiables):
         from .AnonymousNotifiable import AnonymousNotifiable

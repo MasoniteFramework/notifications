@@ -1,7 +1,6 @@
 """Mail driver Class."""
 
-from masonite import Queue, Mail
-from masonite.queues import ShouldQueue
+from masonite import Queue
 from masonite.helpers import config
 from masonite.drivers import BaseDriver, Mailable
 from masonite.app import App
@@ -22,22 +21,26 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
         self._view = self.app.make("View")
 
     def send(self, notifiable, notification):
-        """Used to send the email and run the logic for sending emails."""
+        """Used to send the email."""
+        method, args = self._prepare_email_to_send(notifiable, notification)
+        return method(args)
+
+    def queue(self, notifiable, notification):
+        """Used to queue the email to send."""
+        method, args = self._prepare_email_to_send(notifiable, notification)
+        import pdb; pdb.set_trace()
+        return self.app.make(Queue).push(method, args=args)
+
+    def _prepare_email_to_send(self, notifiable, notification):
+        """Prepare email and return sending method with its arguments."""
         # build email
         data = self.get_data("mail", notifiable, notification)
-
         recipients = self.get_recipients(notifiable, notification)
-        # if isinstance(self, ShouldQueue):
-        #     self.app.make(Queue).push(self.app.make('Mail')
-        #                               .driver(driver)
-        #                               .to(self._to)
-        #                               .subject(self._subject)
-        #                               .send, args=(self.template,))
 
         # data can be a MailComponent or a Mailable
         driver_instance = self.get_mail_driver()
         if isinstance(data, Mailable):
-            return driver_instance.mailable(data).to(recipients).send()
+            return driver_instance.mailable(data).to(recipients).send, None
         else:
             mail = driver_instance.to(recipients).subject(data._subject)
             reply_to_recipients = self.get_reply_to_recipients(data._reply_to)
@@ -45,8 +48,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
                 mail = mail.reply_to(reply_to_recipients)
             if data._from:
                 mail = mail.send_from(self._format_address(data._from))
-
-            return mail.send(data.template)
+            return mail.send, (data.template,)
 
     def get_mail_driver(self):
         """Shortcut method to get given mail driver instance."""

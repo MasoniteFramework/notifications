@@ -5,7 +5,6 @@ from masonite import env
 """Queue Driver
 Queues are an excellent way to send intensive and time consuming tasks
 into the background to improve performance of your application.
-
 Supported: 'async', 'amqp'
 """
 
@@ -17,7 +16,6 @@ Put any configuration settings for your drivers in this configuration setting.
 
 DRIVERS = {
     'async': {
-        'blocking': True,
         'mode': 'threading'
     },
     'amqp': {

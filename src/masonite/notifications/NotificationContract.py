@@ -13,6 +13,14 @@ class NotificationContract(Contract):
             "send() method must be implemented for a notification channel."
         )
 
+    @abstractmethod
+    def queue(self, notifiable, notification):
+        """Implements queuing the notification to be sent later to notifiables through
+        this channel."""
+        raise NotImplementedError(
+            "queue() method must be implemented for a notification channel."
+        )
+
     def get_data(self, channel, notifiable, notification):
         """Get the data for the notification."""
         method_name = "to_{0}".format(channel)
