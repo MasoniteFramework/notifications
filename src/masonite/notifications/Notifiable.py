@@ -56,7 +56,7 @@ class Notifiable(object):
 
     @has_many('id', 'notifiable_id')  # user id -> notifiable id === user id but in notifs table
     def notifications(self):
-        return DatabaseNotification.where('notifiable_type', 'User')
+        return DatabaseNotification.where('notifiable_type', 'users')
 
     # def notifications(self):
     #     """Get the entity's notifications. Only for 'database'
@@ -68,12 +68,13 @@ class Notifiable(object):
     #         .order_by("created_at")
     #         .get()
     #     )
-
+    @property
     def unread_notifications(self):
         """Get the entity's unread notifications. Only for 'database'
         notifications."""
         return self.notifications.where("read_at", "==", None)
 
+    @property
     def read_notifications(self):
         """Get the entity's read notifications. Only for 'database'
         notifications."""

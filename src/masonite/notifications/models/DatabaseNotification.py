@@ -18,12 +18,12 @@ class DatabaseNotification(Model):
     def mark_as_read(self):
         """Mark the notification as read."""
         if not self.read_at:
-            self.set_raw_attribute("read_at", pendulum.now())
+            self.read_at = pendulum.now()
 
     def mark_as_unread(self):
         """Mark the notification as unread."""
         if self.read_at:
-            self.set_raw_attribute("read_at", None)
+            self.read_at = None
 
     @property
     def is_read(self):

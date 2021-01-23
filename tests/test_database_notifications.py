@@ -4,7 +4,7 @@ import unittest.mock
 import uuid
 from masonite.testing import TestCase
 from masoniteorm.models import Model
-from masoniteorm.relationships import morph_to
+from masoniteorm.factories import Factory
 
 # from app.User import User
 from src.masonite.notifications import (
@@ -43,7 +43,14 @@ class WelcomeNotification(Notification):
         return ["database"]
 
 
-# morph_to.set_morph_map({"user": User})
+notification_data = {
+    "id": str(uuid.uuid4()),
+    "read_at": None,
+    "type": "TestNotification",
+    "data": "test",
+    "notifiable_id": 1,
+    "notifiable_type": "users"
+}
 
 
 class TestDatabaseNotifications(TestCase):
@@ -112,36 +119,42 @@ class TestDatabaseNotifications(TestCase):
         user = UserNotifiableTest.where("name", "Joe").get()[0]
         notification = DatabaseNotification.create(
             {
-                "id": str(uuid.uuid4()),
+                **notification_data,
                 "read_at": pendulum.now().to_datetime_string(),
-                "type": "test",
-                "data": "{}",
                 "notifiable_id": user.id,
-                "notifiable_type": "users",
             }
         )
-        self.assertEqual(user.id, notification.notifiable.id)
-        self.assertEqual(UserNotifiableTest, notification.notifiable.__class__)
+        self.assertEqual(user.id, notification.notifiable_id)
+        self.assertEqual(UserNotifiableTest.get_table_name(), notification.notifiable_type)
 
     def test_database_notification_read_state(self):
-        notification = factory(DatabaseNotification).make(read_at=pendulum.now())
+        notification = DatabaseNotification.create({
+            **notification_data,
+            "read_at": pendulum.now().to_datetime_string(),
+        })
         self.assertTrue(notification.is_read)
         notification.read_at = None
         self.assertFalse(notification.is_read)
 
     def test_database_notification_unread_state(self):
-        notification = factory(DatabaseNotification).make(read_at=pendulum.now())
+        notification = DatabaseNotification.create({
+            **notification_data,
+            "read_at": pendulum.now().to_datetime_string(),
+        })
         self.assertFalse(notification.is_unread)
         notification.read_at = None
         self.assertTrue(notification.is_unread)
 
     def test_database_notification_mark_as_read(self):
-        notification = factory(DatabaseNotification).make()
+        notification = DatabaseNotification.create(notification_data)
         notification.mark_as_read()
         self.assertNotEqual(None, notification.read_at)
 
     def test_database_notification_mark_as_unread(self):
-        notification = factory(DatabaseNotification).make(read_at=pendulum.now())
+        notification = DatabaseNotification.create({
+            **notification_data,
+            "read_at": pendulum.now().to_datetime_string(),
+        })
         notification.mark_as_unread()
         self.assertEqual(None, notification.read_at)
 
@@ -153,34 +166,26 @@ class TestDatabaseNotifications(TestCase):
 
     def test_notifiable_get_read_notifications(self):
         user = self.user()
-        self.assertEqual(0, user.read_notifications().count())
+        self.assertEqual(0, user.read_notifications.count())
         DatabaseNotification.create(
             {
-                "id": str(uuid.uuid4()),
-                "read_at": pendulum.now(),
-                "type": "test",
-                "data": "{}",
-                "read_at": None,
+                **notification_data,
+                "read_at": pendulum.yesterday().to_datetime_string(),
                 "notifiable_id": user.id,
-                "notifiable_type": "users",
             }
         )
-        self.assertEqual(1, user.read_notifications().count())
+        self.assertEqual(1, user.read_notifications.count())
 
     def test_notifiable_get_unread_notifications(self):
         user = self.user()
-        self.assertEqual(0, user.unread_notifications().count())
+        self.assertEqual(0, user.unread_notifications.count())
         DatabaseNotification.create(
             {
-                "id": str(uuid.uuid4()),
-                "type": "test",
-                "data": "{}",
-                "read_at": None,
+                **notification_data,
                 "notifiable_id": user.id,
-                "notifiable_type": "users",
             }
         )
-        self.assertEqual(1, user.unread_notifications().count())
+        self.assertEqual(1, user.unread_notifications.count())
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_to_anonymous_not_possible(self, mock_stderr):

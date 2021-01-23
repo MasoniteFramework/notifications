@@ -46,8 +46,8 @@ class TestNotifiable(TestCase):
     def test_user_as_notifiable_entity(self):
         user = self.user()
         self.assertEqual(0, user.notifications.count())
-        self.assertEqual(0, user.read_notifications().count())
-        self.assertEqual(0, user.unread_notifications().count())
+        self.assertEqual(0, user.read_notifications.count())
+        self.assertEqual(0, user.unread_notifications.count())
         self.assertTrue(callable(user.notify))
         self.assertTrue(callable(user.notify_now))
 

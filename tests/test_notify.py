@@ -223,6 +223,6 @@ class TestNotifyHandler(UserTestCase):
         # check email driver
         self.assertIn("Welcome", mock_stderr.getvalue())
         # check database driver
-        self.assertEqual(1, user.notifications().count())
+        self.assertEqual(1, user.notifications.count())
         # check slack driver
         self.assertTrue(responses.assert_call_count(webhook_url, 1))
