@@ -15,6 +15,7 @@ class NotificationVoiceClass(NotificationContract):
     def queue(self, notifiable, notification):
         pass
 
+
 # the custom class should implements send and queue
 NotificationVoiceClass.send = MagicMock(return_value=True)
 NotificationVoiceClass.queue = MagicMock(return_value=True)
@@ -27,6 +28,7 @@ class WelcomeNotification(Notification):
 
 class TestCustomClass(UserTestCase):
     """Test that custom notifications classes can be used in an application."""
+
     def test_sending(self):
         user = self.user()
         notification = WelcomeNotification()

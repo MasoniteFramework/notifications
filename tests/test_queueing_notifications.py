@@ -22,7 +22,6 @@ class MailNotification(Notification, ShouldQueue):
 
 
 class TestQueueingNotifications(unittest.TestCase):
-
     def setUp(self):
         self.app = App()
         self.notification = Notify(self.app)

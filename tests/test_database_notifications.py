@@ -22,6 +22,7 @@ import pendulum
 
 #     __table__ = "users"
 
+
 class User(Model, Notifiable):
     """User Model"""
 
@@ -49,7 +50,7 @@ notification_data = {
     "type": "TestNotification",
     "data": "test",
     "notifiable_id": 1,
-    "notifiable_type": "users"
+    "notifiable_type": "users",
 }
 
 
@@ -67,9 +68,7 @@ class TestDatabaseNotifications(TestCase):
             n.delete()
 
     def setUpFactories(self):
-        User.create(
-            {"name": "Joe", "email": "user@example.com", "password": "secret"}
-        )
+        User.create({"name": "Joe", "email": "user@example.com", "password": "secret"})
 
     def user(self):
         return User.where("name", "Joe").get()[0]
@@ -125,22 +124,28 @@ class TestDatabaseNotifications(TestCase):
             }
         )
         self.assertEqual(user.id, notification.notifiable_id)
-        self.assertEqual(UserNotifiableTest.get_table_name(), notification.notifiable_type)
+        self.assertEqual(
+            UserNotifiableTest.get_table_name(), notification.notifiable_type
+        )
 
     def test_database_notification_read_state(self):
-        notification = DatabaseNotification.create({
-            **notification_data,
-            "read_at": pendulum.now().to_datetime_string(),
-        })
+        notification = DatabaseNotification.create(
+            {
+                **notification_data,
+                "read_at": pendulum.now().to_datetime_string(),
+            }
+        )
         self.assertTrue(notification.is_read)
         notification.read_at = None
         self.assertFalse(notification.is_read)
 
     def test_database_notification_unread_state(self):
-        notification = DatabaseNotification.create({
-            **notification_data,
-            "read_at": pendulum.now().to_datetime_string(),
-        })
+        notification = DatabaseNotification.create(
+            {
+                **notification_data,
+                "read_at": pendulum.now().to_datetime_string(),
+            }
+        )
         self.assertFalse(notification.is_unread)
         notification.read_at = None
         self.assertTrue(notification.is_unread)
@@ -151,10 +156,12 @@ class TestDatabaseNotifications(TestCase):
         self.assertNotEqual(None, notification.read_at)
 
     def test_database_notification_mark_as_unread(self):
-        notification = DatabaseNotification.create({
-            **notification_data,
-            "read_at": pendulum.now().to_datetime_string(),
-        })
+        notification = DatabaseNotification.create(
+            {
+                **notification_data,
+                "read_at": pendulum.now().to_datetime_string(),
+            }
+        )
         notification.mark_as_unread()
         self.assertEqual(None, notification.read_at)
 

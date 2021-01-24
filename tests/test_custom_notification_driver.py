@@ -23,13 +23,11 @@ NotificationVoiceDriver.queue = MagicMock(return_value=True)
 
 
 class WelcomeNotification(Notification):
-
     def via(self, notifiable):
         return ["voice"]
 
 
 class TestCustomDriverNotRegistered(UserTestCase):
-
     def test_sending_should_fail_when_driver_not_registered(self):
         user = self.user()
         with self.assertRaises(InvalidNotificationType) as e:

@@ -14,6 +14,7 @@ class WelcomeNotification(Notification):
 
 class TestNotificationClass(TestCase):
     sqlite = False
+
     def setUp(self):
         super().setUp()
         self.notification = Notify(self.container)
