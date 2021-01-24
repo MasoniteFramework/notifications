@@ -48,7 +48,7 @@ class Notify(object):
                 ):
                     continue
                 notification_id = uuid.uuid4()
-                return self.send_or_queue(
+                self.send_or_queue(
                     notifiable,
                     notification,
                     notification_id,
