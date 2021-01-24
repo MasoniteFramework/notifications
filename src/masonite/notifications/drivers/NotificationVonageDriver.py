@@ -23,7 +23,7 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
             key=config("notifications.vonage.key"),
             secret=config("notifications.vonage.secret"),
         )
-        self._sms_from = config("notifications.vonage.sms_from") or None
+        self._sms_from = config("notifications.vonage.sms_from", None)
 
     def send(self, notifiable, notification):
         """Used to send the SMS."""

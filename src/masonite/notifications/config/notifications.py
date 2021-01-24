@@ -10,3 +10,7 @@ VONAGE = {
     "secret": env("VONAGE_SECRET", ""),
     "sms_from": env("VONAGE_SMS_FROM", "+33000000000"),
 }
+
+SLACK = {
+    "token": env("SLACK_TOKEN", "")
+}

@@ -41,10 +41,6 @@ class SlackChannelArchived(SlackDriverException):
     pass
 
 
-class SlackPostForbidden(SlackDriverException):
-    pass
-
-
 class SlackInvalidWebhook(SlackDriverException):
     pass
 
@@ -54,6 +50,10 @@ class SlackInvalidWorkspace(SlackDriverException):
 
 
 class SlackInvalidMessage(SlackDriverException):
+    pass
+
+
+class SlackAPIError(SlackDriverException):
     pass
 
 

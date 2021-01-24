@@ -4,14 +4,15 @@ from masonite.managers.QueueManager import Queue
 import requests
 from masonite.app import App
 from masonite.drivers import BaseDriver
+from masonite.helpers import config
 
 from ..exceptions import (
-    SlackChannelNotFound,
+    SlackAPIError, SlackChannelNotFound,
     SlackInvalidMessage,
     SlackInvalidWorkspace,
-    SlackPostForbidden,
     SlackChannelArchived,
     SlackInvalidWebhook,
+    SlackAPIError
 )
 from ..NotificationContract import NotificationContract
 
@@ -31,16 +32,17 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
         """
         self.app = app
         self._debug = True
+        self._token = config("notifications.slack.token", None)
 
     def send(self, notifiable, notification):
         """Used to send the notification to slack."""
-        method, args = self._prepare_slack_message(notifiable, notification)
-        return method(*args)
+        method, method_args = self._prepare_slack_message(notifiable, notification)
+        return method(*method_args)
 
     def queue(self, notifiable, notification):
         """Used to queue the notification to be sent to slack."""
-        method, args = self._prepare_slack_message(notifiable, notification)
-        return self.app.make(Queue).push(method, args=args)
+        method, method_args = self._prepare_slack_message(notifiable, notification)
+        return self.app.make(Queue).push(method, args=method_args)
 
     def _prepare_slack_message(self, notifiable, notification):
         """Prepare slack message to be sent."""
@@ -55,7 +57,7 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
         For Slack it can be:
-            - an incoming webhook (or a list of incoming webhooks) that you defined in your app OR
+            - an incoming webhook (or a list of incoming webhooks) that you defined in your app
             return webhook_url
             return [webhook_url_1, webhook_url_2]
             - a channel name or ID (it will use Slack API and requires a Slack token
@@ -65,7 +67,6 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
         You cannot mix both.
         """
         recipients = notifiable.route_notification_for("slack", notification)
-        # multiple recipients
         if isinstance(recipients, list):
             _modes = []
             for recipient in recipients:
@@ -74,10 +75,12 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
                 raise ValueError(
                     "NotificationSlackDriver: sending mode cannot be mixed."
                 )
+            mode = _modes[0]
         else:
             mode = self._check_recipient_type(recipients)
-            self.sending_mode = mode
             recipients = [recipients]
+
+        self.sending_mode = mode
         return recipients
 
     def _check_recipient_type(self, recipient):
@@ -87,7 +90,7 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             return self.API_MODE
 
     def send_via_webhook(self, payload, webhook_urls):
-        data = json.dumps(payload.as_dict())
+        data = payload.as_dict()
         if self._debug:
             print(data)
         for webhook_url in webhook_urls:
@@ -95,14 +98,12 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
                 webhook_url, data=data, headers={"Content-Type": "application/json"}
             )
             if response.status_code != 200:
-                self._handle_webhook_error(response, payload)
+                self._handle_webhook_error(response, data)
 
     def send_via_api(self, payload, channels):
-        raise NotImplementedError("""Sending slack notifications with API is not implemented.
-        Please set sending_mode to WEBHOOK_MODE.""")
-        # data =
+        """Send Slack notification with Slack Web API as documented
+        here https://api.slack.com/methods/chat.postMessage"""
         for channel in channels:
-            pass
             # if notification._as_snippet:
             #     requests.post('https://slack.com/api/files.upload', {
             #         'token': notification._token,
@@ -114,95 +115,102 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             #         'title': notification._title,
             #     })
             # else:
-            #     requests.post('https://slack.com/api/chat.postMessage', {
-            #         'token': notification._token,
-            #         'channel': channel,
-            #         'text': notification._text,
-            #         'username': notification._username,
-            #         'icon_emoji': notification._icon_emoji,
-            #         'as_user': notification._as_current_user,
-            #         'mrkdwn': notification._mrkdwn,
-            #         'reply_broadcast': notification._reply_broadcast,
-            #         'unfurl_links': notification._unfurl,
-            #         'unfurl_media': notification._unfurl,
-            #         'attachments': json.dumps(notification._attachments),
-            #     })
+            # use notification defined token else globally configured token
+            token = payload._token or self._token
+            channel = self._get_channel_id(channel, token)
+            payload = {
+                **payload.as_dict(),
+                # mandatory
+                "token": token,
+                "channel": channel,
+            }
+            if self._debug:
+                print(payload)
+            self._call_slack_api("https://slack.com/api/chat.postMessage", payload)
+
+    def _call_slack_api(self, url, payload):
+        response = requests.post(url, payload)
+        data = response.json()
+        if not data["ok"]:
+            self._raise_related_error(data["error"], payload)
+        else:
+            return data
 
     def _handle_webhook_error(self, response, payload):
-        if response.text == "invalid_payload":
+        self._raise_related_error(response.text, payload)
+
+    def _raise_related_error(self, error_key, payload):
+        if error_key == "invalid_payload":
             raise SlackInvalidMessage(
-                "The message is malforme: perhaps the JSON is structured incorrectly, or the message text is not properly escaped."
+                "The message is malformed: perhaps the JSON is structured incorrectly, or the message text is not properly escaped."
             )
-        elif response.text == "too_many_attachments":
+        elif error_key == "invalid_auth":
+            raise SlackAPIError(
+                "Some aspect of authentication cannot be validated. Either the provided token is invalid or the request originates from an IP address disallowed from making the request."
+            )
+        elif error_key == "too_many_attachments":
             raise SlackInvalidMessage(
                 "Too many attachments: the message can have a maximum of 100 attachments associated with it."
             )
-        elif response.text == "channel_not_found":
+        elif error_key == "channel_not_found":
             raise SlackChannelNotFound(
                 "The user or channel being addressed either do not exist or is invalid: {}".format(
-                    payload._channel
+                    payload["channel"]
                 )
             )
-        elif response.text == "channel_is_archived":
+        elif error_key == "channel_is_archived":
             raise SlackChannelArchived(
                 "The channel being addressed has been archived and is no longer accepting new messages: {}".format(
-                    payload._channel
+                    payload["channel"]
                 )
             )
-        elif response.text in [
+        elif error_key in [
             "action_prohibited",
             "posting_to_general_channel_denied",
         ]:
-            raise SlackPostForbidden(
+            raise SlackAPIError(
                 "You don't have the permission to post to this channel right now: {}".format(
-                    payload._channel
+                    payload["channel"]
                 )
             )
-        elif response.text in ["no_service", "no_service_id"]:
+        elif error_key in ["no_service", "no_service_id"]:
             raise SlackInvalidWebhook(
                 "The provided incoming webhook is either disabled, removed or invalid."
             )
-        elif response.text in ["no_team", "team_disabled"]:
+        elif error_key in ["no_team", "team_disabled"]:
             raise SlackInvalidWorkspace(
                 "The Slack workspace is no longer active or is missing or invalid."
             )
+        else:
+            raise SlackAPIError("{}. Check Slack API docs.".format(error_key))
 
-    # def build_payload(self, notifiable, notification):
-    #     # TODO: if notifiable is not instance of Model it won't work ...
-    #     # TODO: if notifiable PK is not integer it won't work ...
-    #     return {
-    #         "id": str(notification.id),
-    #         "type": notification.notification_type(),
-    #         "notifiable_id": notifiable.id,
-    #         "notifiable_type": notifiable.__class__.get_morph_name(),
-    #         "data": self.serialize_data(self.get_data("database", notifiable, notification)),
-    #         "read_at": None
-    #     }
+    def _get_channel_id(self, name, token):
+        """"Returns Slack channel's ID from given channel."""
+        if "#" in name:
+            return self._find_channel(name, token)
+        else:
+            return name
 
-    # def find_channel(self, name):
-    #     """Calls the Slack API to find the channel name.
+    def _find_channel(self, name, token):
+        """Calls the Slack API to find the channel name. This is so we do not have to specify the channel ID's.
+        Slack requires channel ID's to be used.
 
-    #     This is so we do not have to specify the channel ID's. Slack requires channel ID's
-    #     to be used.
+        Arguments:
+            name {string} -- The channel name to find.
 
-    #     Arguments:
-    #         name {string} -- The channel name to find.
+        Raises:
+            SlackChannelNotFound -- Thrown if the channel name is not found.
 
-    #     Raises:
-    #         SlackChannelNotFound -- Thrown if the channel name is not found.
+        Returns:
+            self
+        """
+        response = self._call_slack_api('https://slack.com/api/conversations.list', {
+            'token': token
+        })
+        for channel in response['channels']:
+            if channel['name'] == name.split('#')[1]:
+                return channel['id']
 
-    #     Returns:
-    #         self
-    #     """
-    #     if self._run:
-    #         response = requests.post('https://slack.com/api/channels.list', {
-    #             'token': self._token
-    #         })
-    #         for channel in response.json()['channels']:
-    #             if channel['name'] == name.split('#')[1]:
-    #                 return channel['id']
-
-    #         raise SlackChannelNotFound(
-    #             'Could not find the {} channel'.format(name))
-    #     else:
-    #         return 'TEST_ID'
+        raise SlackChannelNotFound(
+            "The user or channel being addressed either do not exist or is invalid: {}".format(name)
+        )

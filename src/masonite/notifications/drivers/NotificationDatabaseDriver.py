@@ -27,8 +27,6 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
 
     def build_payload(self, notifiable, notification):
         """Build an array payload for the DatabaseNotification Model."""
-        # TODO: if notifiable is not instance of Model it won't work ...
-        # TODO: if notifiable PK is not integer it won't work ...
         return {
             "id": str(notification.id),
             "type": notification.notification_type(),

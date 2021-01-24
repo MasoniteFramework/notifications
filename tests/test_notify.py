@@ -41,6 +41,12 @@ class WelcomeNotification(Notification):
         return ["mail"]
 
 
+class SlackAndMailNotification(WelcomeNotification):
+
+    def to_slack(self, notifiable):
+        return SlackComponent().text("Welcome!")
+
+
 class TestNotifyHandler(UserTestCase):
     def setUp(self):
         super().setUp()
@@ -57,17 +63,20 @@ class TestNotifyHandler(UserTestCase):
         self.assertIn("Welcome John", printed_email)
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
+    @responses.activate
     def test_send_notification_to_anonymous_user_with_multiple_channels(
         self, mock_stderr
     ):
+        responses.add(responses.POST, webhook_url, body=b"ok")
         user_email = "john.doe@masonite.com"
-        self.notification.route("mail", user_email).route("slack", "#general").notify(
-            WelcomeNotification("John")
+        self.notification.route("mail", user_email).route("slack", webhook_url).notify(
+            SlackAndMailNotification("John")
         )
         # check email notification sent
         printed_email = mock_stderr.getvalue()
         self.assertIn("john.doe@masonite.com", printed_email)
-        # TODO: check Slack notification sent ?
+        # check slack notification sent
+        self.assertTrue(responses.assert_call_count(webhook_url, 1))
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_dry_notification_on_notification_class(self, mock_stderr):

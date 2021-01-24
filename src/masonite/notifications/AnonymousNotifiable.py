@@ -1,5 +1,6 @@
 """Anonymous Notifiable mixin"""
 
+from src.masonite.notifications.Notify import Notify
 from .Notifiable import Notifiable
 
 
@@ -26,3 +27,8 @@ class AnonymousNotifiable(Notifiable):
             raise ValueError(
                 "Routing has not been defined for the channel {}".format(channel)
             )
+
+    def notify(self, notification, dry=False, fail_silently=False):
+        """Send the given notification."""
+        from wsgi import container
+        return Notify(container).send(self, notification, self._routes, dry, fail_silently)

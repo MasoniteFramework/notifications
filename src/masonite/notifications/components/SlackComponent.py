@@ -1,65 +1,53 @@
 """Slack Component Class"""
+import json
 from .BaseComponent import BaseComponent
 
 from ..exceptions import NotificationFormatError
 
 
 class SlackComponent(BaseComponent):
-
-    _text = ""
-    _username = "masonite-bot"
-    _icon_emoji = ""
-    _channel = ""
-    _text = ""
-    # Indicates if channel names and usernames should be linked.
-    _link_names = 0
-    # Indicates if you want a preview of links inlined in the message.
-    _unfurl_links = False
-    # Indicates if you want a preview of links to media inlined in the message.
-    _unfurl_media = False
-    _attachments = []
-
     def __init__(self):
         super().__init__()
+        self._text = ""
+        self._username = "masonite-bot"
+        self._icon_emoji = ""
+        self._icon_url = ""
+        self._channel = ""
+        self._text = ""
+        self._mrkdwn = True
+        self._as_current_user = False
+        self._reply_broadcast = False
+        self._token = ""
+        # Indicates if channel names and usernames should be linked.
+        self._link_names = False
+        # Indicates if you want a preview of links inlined in the message.
+        self._unfurl_links = False
+        # Indicates if you want a preview of links to media inlined in the message.
+        self._unfurl_media = False
+        self._blocks = []
         self._colors = {"success": "good", "error": "danger", "warning": "warning"}
 
-    # _as_user = True
-
-    # _as_current_user = False
-    # _mrkdwn = True
-    # _reply_broadcast = False
-    # _attachments = []
-    # _run = True
-    # _unfurl = True
-    # _as_snippet = False
-
-    # _attach = ''
-    # _dont_link = True
-    # _as_markdown = False
-
-    def send_from(self, username, icon=None):
+    def send_from(self, username, icon=None, url=None):
         """Set a custom username and optional emoji icon for the Slack message."""
         self._username = username
-        self._icon_emoji = icon
+        if icon:
+            self._icon_emoji = icon
+        elif url:
+            self._icon_url = url
         return self
 
     def to(self, channel):
         """Specifies the channel to send the message to. It can be either
-        a channel: #general or a direct message to a user: @samuel.
+        a channel ID or a channel name (with #).
 
         Arguments:
-            channel {string} -- The channel to send the message to (prefixed with # or @).
+            channel {string} -- The channel to send the message to.
 
         Returns:
             self
         """
-        self._channel = self._check_channel_format(channel)
+        self._channel = channel
         return self
-
-    def _check_channel_format(self, channel):
-        if "@" not in channel and "#" not in channel:
-            raise NotificationFormatError("channel name should be prefixed by # or @.")
-        return channel
 
     def text(self, text):
         """Specifies the text to be sent in the message.
@@ -75,7 +63,7 @@ class SlackComponent(BaseComponent):
 
     def link_names(self):
         """Find and link channel names and usernames in message."""
-        self._link_names = 1
+        self._link_names = True
         return self
 
     def unfurl_links(self):
@@ -92,226 +80,95 @@ class SlackComponent(BaseComponent):
         return self
 
     def as_dict(self):
-        optional_fields = {
-            "icon_emoji": self._icon_emoji,
-            # "icon_url"
+        return {
+            "text": self._text,
+            # this one is overriden when using api mode
+            "channel": self._channel,
+            # optional
             "link_names": self._link_names,
             "unfurl_links": self._unfurl_links,
             "unfurl_media": self._unfurl_media,
             "username": self._username,
-            "channel": self._channel,
-        }
-        return {
-            **optional_fields,
-            "text": self._text,
-            "attachments": []
-            # "attachments": [self.attachment_as_dict()]
-        }
-
-    def attachment_as_dict(self):
-        # TODO (later): add support for attachments
-        return {
-            "fallback": "Nouvelle tâche ouverte [Urgent]: <http://url_to_task|Tester les pièces jointes de message de Slack>",
-            "pretext": "Nouvelle tâche ouverte [Urgent]: <http://url_to_task|Tester les pièces jointes de message de Slack>",
-            "color": "#D00000",
-            "fields": [
-                {
-                    "title": "Remarques",
-                    "value": "C'est beaucoup plus facile que ce à quoi je m'attendais.",
-                    "short": False,
-                }
-            ],
+            "as_user": self._as_current_user,
+            "icon_emoji": self._icon_emoji,
+            "icon_url": self._icon_url,
+            "mrkdwn": self._mrkdwn,
+            "reply_broadcast": self._reply_broadcast,
+            "blocks": json.dumps([block._resolve() for block in self._blocks]),
         }
 
-        # def channel(self, channel):
-        #     """Specifies the channel to send the message to.
+    def token(self, token):
+        """[API_MODE only] Specifies the token to use for Slack authentication.
 
-        #     Arguments:
-        #         channel {string} -- The channel to send the message to.
+        Arguments:
+            token {string} -- The Slack authentication token.
 
-        #     Returns:
-        #         self
-        #     """
-        #     if channel.startswith('#'):
-        #         self._channel = self.find_channel(channel)
-        #     else:
-        #         self._channel = channel
+        Returns:
+            self
+        """
+        self._token = token
+        return self
 
-        #     return self
+    def as_current_user(self):
+        """[API_MODE only] Send message as the currently authenticated user.
 
-        # def token(self, token):
-        #     """Specifes the token to use for Slack authentication.
+        Returns:
+            self
+        """
+        self._as_current_user = True
+        return self
 
-        #     Arguments:
-        #         token {string} -- The Slack authentication token.
+    def without_markdown(self):
+        """Specifies whether the message should explicitly not honor markdown text.
 
-        #     Returns:
-        #         self
-        #     """
-        #     self._token = token
-        #     return self
+        Returns:
+            self
+        """
+        self._mrkdwn = False
+        return self
 
-        # def as_user(self, username):
-        #     """Specifies the user to send the message as.
+    def can_reply(self):
+        """Whether the message should be ably to be replied back to.
 
-        #     Arguments:
-        #         username {string} -- The username to send the message as.
+        Returns:
+            self
+        """
+        self._reply_broadcast = True
+        return self
 
-        #     Returns:
-        #         self
-        #     """
-        #     self._username = username
-        #     return self
+    def block(self, block_instance):
+        from slackblocks.blocks import Block
 
-        # def icon(self, emoji):
-        #     """The emoji as the icon to send.
+        if not isinstance(block_instance, Block):
+            raise NotificationFormatError("Blocks should be imported from slackblocks.")
+        self._blocks.append(block_instance)
+        return self
 
-        #     Arguments:
-        #         emoji {string} -- The emoji to use.
+    # def as_snippet(self, file_type='python', name='snippet', title='My Snippet'):
+    #     """Whether the current message should be sent as a snippet or not.
 
-        #     Returns:
-        #         self
-        #     """
-        #     self._icon_emoji = emoji
-        #     return self
+    #     Keyword Arguments:
+    #         file_type {string} -- The type of the snippet. (default: {'python'})
+    #         name {string} -- The name of the snippet. (default: {'snippet'})
+    #         title {string} -- The title of the snippet. (default: {'My Snippet'})
 
-        # def as_current_user(self):
-        #     """Sets the boolean on whether to use the currently authenticated user as the message.
+    #     Returns:
+    #         self
+    #     """
+    #     self._as_snippet = True
+    #     self._snippet_name = name
+    #     self._type = file_type
+    #     self._title = title
+    #     return self
 
-        #     This is found using the token that is used for authentication.
+    # def comment(self, comment):
+    #     """Sets the initial comment on the message.
 
-        #     Returns:
-        #         self
-        #     """
-        #     self._as_current_user = True
-        #     return self
+    #     Arguments:
+    #         comment {string} -- The text of the comment.
 
-        # def without_markdown(self):
-        #     """Specifies whether the message should explicitly not honor markdown text.
-
-        #     Returns:
-        #         self
-        #     """
-        #     self._mrkdwn = False
-        #     return self
-
-        # def dont_unfurl(self):
-        #     """Whether the message should unfurl any media message.
-
-        #     Unfurling is when it shows a bigger part of the message after the text is sent
-        #     like when pasting a link and it showing the header images.
-
-        #     Returns:
-        #         self
-        #     """
-        #     self._unfurl = False
-        #     return self
-
-        # def can_reply(self):
-        #     """Whether the message should be ably to be replied back to.
-
-        #     Returns:
-        #         self
-        #     """
-        #     self._reply_broadcast = True
-        #     return self
-
-        # def as_snippet(self, file_type='python', name='snippet', title='My Snippet'):
-        #     """Whether the current message should be sent as a snippet or not.
-
-        #     Keyword Arguments:
-        #         file_type {string} -- The type of the snippet. (default: {'python'})
-        #         name {string} -- The name of the snippet. (default: {'snippet'})
-        #         title {string} -- The title of the snippet. (default: {'My Snippet'})
-
-        #     Returns:
-        #         self
-        #     """
-        #     self._as_snippet = True
-        #     self._snippet_name = name
-        #     self._type = file_type
-        #     self._title = title
-        #     return self
-
-        # def comment(self, comment):
-        #     """Sets the initial comment on the message.
-
-        #     Arguments:
-        #         comment {string} -- The text of the comment.
-
-        #     Returns:
-        #         self
-        #     """
-        #     self._initial_comment = comment
-        #     return self
-
-        # def button(self, text, url, **options):
-        #     """Shows an action button to use.
-
-        #     Arguments:
-        #         text {string} -- The text to show inside the button.
-        #         url {string} -- The url the button should go back to.
-
-        #     Returns:
-        #         self
-        #     """
-        #     additional = {}
-        #     if options.get('confirm'):
-        #         additional.update(options.get('confirm'))
-
-        #     data = {
-        #         "type": "button",
-        #         "text": text,
-        #         # "name": options.get('name', 'button'),
-        #         "style": options.get('style', 'primary'),
-        #         "url": url
-        #     }.update(additional)
-
-        #     if not self._attachments:
-        #         self._attachments.append(
-        #             {
-        #                 "fallback": "Your device is not able to view button links.",
-        #                 'actions': [
-        #                     data
-        #                 ]
-        #             }
-        #         )
-        #     else:
-        #         self._attachments[0]['actions'].append(data)
-        #     return self
-
-        # def attach(self, file):
-        #     pass
-
-        # def thumbnail(self, location):
-        #     pass
-
-        # def dont_link(self):
-        #     pass
-
-        # def find_channel(self, name):
-        # """Calls the Slack API to find the channel name.
-
-        # This is so we do not have to specify the channel ID's. Slack requires channel ID's
-        # to be used.
-
-        # Arguments:
-        #     name {string} -- The channel name to find.
-
-        # Raises:
-        #     SlackChannelNotFound -- Thrown if the channel name is not found.
-
-        # Returns:
-        #     self
-        # """
-        # if self._run:
-        #     response = requests.post(
-        #         "https://slack.com/api/channels.list", {"token": self._token}
-        #     )
-        #     for channel in response.json()["channels"]:
-        #         if channel["name"] == name.split("#")[1]:
-        #             return channel["id"]
-
-        #     raise SlackChannelNotFound("Could not find the {} channel".format(name))
-        # else:
-        #     return "TEST_ID"
+    #     Returns:
+    #         self
+    #     """
+    #     self._initial_comment = comment
+    #     return self
