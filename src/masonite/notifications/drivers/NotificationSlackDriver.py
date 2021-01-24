@@ -30,7 +30,7 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
             app {masonite.app.App} -- The Masonite container object.
         """
         self.app = app
-        self._debug = True
+        self._debug = False
         self._token = config("notifications.slack.token", None)
 
     def send(self, notifiable, notification):

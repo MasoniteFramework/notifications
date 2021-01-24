@@ -19,11 +19,13 @@ class DatabaseNotification(Model):
         """Mark the notification as read."""
         if not self.read_at:
             self.read_at = pendulum.now()
+            return self.save(query=True)
 
     def mark_as_unread(self):
         """Mark the notification as unread."""
         if self.read_at:
             self.read_at = None
+            return self.save(query=True)
 
     @property
     def is_read(self):

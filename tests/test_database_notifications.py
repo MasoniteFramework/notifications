@@ -4,9 +4,7 @@ import unittest.mock
 import uuid
 from masonite.testing import TestCase
 from masoniteorm.models import Model
-from masoniteorm.factories import Factory
 
-# from app.User import User
 from src.masonite.notifications import (
     Notifiable,
     Notification,
@@ -15,12 +13,6 @@ from src.masonite.notifications import (
 )
 from src.masonite.notifications.drivers import NotificationDatabaseDriver
 import pendulum
-
-
-# class UserTest(User, Notifiable):
-#     """Notifiable User Test Model"""
-
-#     __table__ = "users"
 
 
 class User(Model, Notifiable):

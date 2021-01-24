@@ -1,6 +1,7 @@
 """ A NotificationProvider Service Provider """
-
+import os
 from masonite.provider import ServiceProvider
+
 from .. import Notify
 from ..drivers import (
     NotificationMailDriver,
@@ -10,7 +11,9 @@ from ..drivers import (
     NotificationVonageDriver,
 )
 from ..NotificationManager import NotificationManager
-from ..commands import NotificationCommand, NotificationTableCommand, NotificationInstallCommand
+from ..commands import (
+    NotificationCommand,
+)
 
 
 class NotificationProvider(ServiceProvider):
@@ -19,9 +22,7 @@ class NotificationProvider(ServiceProvider):
     wsgi = False
 
     def register(self):
-        self.app.bind("NotificationInstallCommand", NotificationInstallCommand())
         self.app.bind("NotificationCommand", NotificationCommand())
-        self.app.bind("NotificationTableCommand", NotificationTableCommand())
 
         self.app.bind("Notification", Notify(self.app))
         self.app.bind("NotificationMailDriver", NotificationMailDriver)
@@ -30,3 +31,16 @@ class NotificationProvider(ServiceProvider):
         self.app.bind("NotificationSlackDriver", NotificationSlackDriver)
         self.app.bind("NotificationVonageDriver", NotificationVonageDriver)
         self.app.bind("NotificationManager", NotificationManager(self.app))
+
+    def boot(self):
+        migration_path = os.path.join(os.path.dirname(__file__), "../migrations")
+        config_path = os.path.join(os.path.dirname(__file__), "../config")
+        self.publishes(
+            {os.path.join(config_path, "notifications.py"): "config/notifications.py"},
+            tag="config",
+        )
+        self.publishes_migrations(
+            [
+                os.path.join(migration_path, "create_notifications_table.py"),
+            ],
+        )
