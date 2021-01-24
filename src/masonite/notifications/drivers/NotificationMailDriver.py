@@ -37,7 +37,7 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
         recipients = self.get_recipients(notifiable, notification)
 
         # data can be a MailComponent or a Mailable
-        driver_instance = self.get_mail_driver()
+        driver_instance = self.get_mail_driver(data)
         if isinstance(data, Mailable):
             return driver_instance.mailable(data).to(recipients).send, ()
         else:
@@ -49,10 +49,14 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
                 mail = mail.send_from(self._format_address(data._from))
             return mail.send, (data.template,)
 
-    def get_mail_driver(self):
-        """Shortcut method to get given mail driver instance."""
-        driver = config("mail.driver") if not self._driver else None
-        return self.app.make("Mail").driver(driver)
+    def get_mail_driver(self, data):
+        """Get mail driver instance to user for this notification."""
+        default_driver = config("mail.driver")
+        try:
+            driver_name = getattr(data, "_driver", default_driver)
+        except AttributeError:
+            driver_name = default_driver
+        return self.app.make("Mail").driver(driver_name)
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
@@ -90,15 +94,3 @@ class NotificationMailDriver(BaseDriver, NotificationContract):
                     "route_notification_for_mail() should return a string or a tuple (email, name)"
                 )
             return "{1} <{0}>".format(*recipient)
-
-    def driver(self, driver):
-        """Specifies the driver to use.
-
-        Arguments:
-            driver {string} -- The name of the driver.
-
-        Returns:
-            self
-        """
-        self._driver = driver
-        return self

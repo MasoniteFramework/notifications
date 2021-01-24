@@ -1,4 +1,5 @@
 import io
+import os
 import unittest
 import unittest.mock
 from masonite.testing import TestCase
@@ -48,6 +49,14 @@ class CustomNotification(NotificationFacade):
         return ["mail"]
 
 
+class OverrideDriverNotification(NotificationFacade):
+    def to_mail(self, notifiable):
+        return MailComponent().subject("Welcome!").driver("log")
+
+    def via(self, notifiable):
+        return ["mail"]
+
+
 class TestMailNotifications(TestCase):
     sqlite = False
 
@@ -91,6 +100,10 @@ class TestMailNotifications(TestCase):
     def test_to_mail_heading(self):
         message = MailComponent().heading("Welcome heading!")
         self.assertIn("Welcome heading!", message.template)
+
+    def test_to_mail_driver(self):
+        message = MailComponent().driver("mailgun")
+        self.assertEqual("mailgun", message._driver)
 
     def test_to_mail_action(self):
         message = MailComponent().action("Connect", href="/login")
@@ -209,3 +222,15 @@ class TestMailNotifications(TestCase):
         self.notification.route("mail", "test@mail.com").notify(CustomNotification())
         self.assertIn("To: test@mail.com", mock_stderr.getvalue())
         self.assertIn("Welcome!", mock_stderr.getvalue())
+
+    def test_override_driver(self):
+        self.notification.route("mail", "log@mail.com").notify(OverrideDriverNotification())
+        filepath = '{0}/{1}'.format('tests', 'mail.log')
+        logfile = open(filepath, 'r')
+        file_string = logfile.read()
+        self.assertIn('log@mail.com', file_string)
+        self.assertIn('Welcome!', file_string)
+        # teardown
+        logfile.close()
+        if os.path.isfile(filepath):
+            os.remove(filepath)

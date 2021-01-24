@@ -26,8 +26,9 @@ class NotificationContract(Contract):
         method_name = "to_{0}".format(channel)
         try:
             method = getattr(notification, method_name)
-            return method(notifiable)
         except AttributeError:
             raise NotImplementedError(
                 "Notification model should implement {}() method.".format(method_name)
             )
+        else:
+            return method(notifiable)

@@ -20,6 +20,7 @@ class MailComponent(BaseComponent):
         self._subject = None
         self._from = ""
         self._reply_to = ""
+        self._driver = None
 
     def line(self, message):
         """Writes a line to a template.
@@ -126,4 +127,16 @@ class MailComponent(BaseComponent):
                 self._reply_to = addresses
         else:
             self._reply_to = addresses
+        return self
+
+    def driver(self, driver):
+        """Override the default driver used to send the email.
+
+        Arguments:
+            driver {string} -- The name of the driver.
+
+        Returns:
+            self
+        """
+        self._driver = driver
         return self

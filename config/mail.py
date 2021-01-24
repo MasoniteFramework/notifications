@@ -19,7 +19,7 @@ additional drivers as you need or pip install additional drivers.
 Supported: 'smtp', 'mailgun'
 """
 
-DRIVER = env('MAIL_DRIVER', 'smtp')
+DRIVER = env('MAIL_DRIVER', 'terminal')
 
 """Mail Drivers
 Different drivers you can use for sending email.
@@ -36,5 +36,9 @@ DRIVERS = {
     'mailgun': {
         'secret': env('MAILGUN_SECRET', 'key-XX'),
         'domain': env('MAILGUN_DOMAIN', 'sandboxXX.mailgun.org')
+    },
+    'log': {
+        'file': 'mail.log',
+        'location': 'tests/'
     }
 }
