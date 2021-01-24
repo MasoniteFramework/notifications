@@ -25,7 +25,7 @@ deepsource:
 	./bin/deepsource report --analyzer test-coverage --key python --value-file ./coverage.xml
 coverage: ## Run package tests and upload coverage reports
 	python -m pytest --cov-report term --cov-report xml --cov=src/masonite tests/
-	python -m coveralls
+	python -m coveralls --service=github
 publish: ## Publish package to pypi
 	pip install 'twine>=1.5.0'
 	python setup.py sdist bdist_wheel
