@@ -33,6 +33,6 @@ setup(
     extras_require={
         "test": ["coverage", "pytest", "pytest-cov", "coveralls", "responses"],
         "dev": ["black", "flake8", "twine>=1.5.0", "wheel"],
-        "services": ["pusher", "ably", "vonage"]
+        "services": ["pusher", "ably", "vonage", "slackblocks"]
     },
 )

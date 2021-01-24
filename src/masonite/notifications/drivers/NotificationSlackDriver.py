@@ -1,5 +1,4 @@
 """Slack driver Class"""
-import json
 from masonite.managers.QueueManager import Queue
 import requests
 from masonite.app import App
@@ -7,7 +6,7 @@ from masonite.drivers import BaseDriver
 from masonite.helpers import config
 
 from ..exceptions import (
-    SlackAPIError, SlackChannelNotFound,
+    SlackChannelNotFound,
     SlackInvalidMessage,
     SlackInvalidWorkspace,
     SlackChannelArchived,

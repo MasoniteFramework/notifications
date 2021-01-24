@@ -42,7 +42,6 @@ class WelcomeNotification(Notification):
 
 
 class SlackAndMailNotification(WelcomeNotification):
-
     def to_slack(self, notifiable):
         return SlackComponent().text("Welcome!")
 
