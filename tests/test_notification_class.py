@@ -1,10 +1,10 @@
 from masonite.testing import TestCase
 
-from src.masonite.notifications import Notification, Notify
+from src.masonite.notifications import Notification, NotificationFacade
 from src.masonite.notifications.components import MailComponent
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_mail(self, notifiable):
         return MailComponent().subject("Welcome")
 
@@ -17,7 +17,7 @@ class TestNotificationClass(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
 
     def test_should_send(self):
         notification = WelcomeNotification()
@@ -37,7 +37,7 @@ class TestNotificationClass(TestCase):
         )
 
     def test_that_via_should_be_implemented(self):
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             pass
 
         with self.assertRaises(TypeError):

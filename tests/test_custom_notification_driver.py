@@ -2,8 +2,7 @@ from masonite.drivers import BaseDriver
 from unittest.mock import MagicMock
 
 from .UserTestCase import UserTestCase
-from src.masonite.notifications import Notification, NotificationContract
-from src.masonite.notifications.components import MailComponent
+from src.masonite.notifications import NotificationFacade, NotificationContract
 from src.masonite.notifications.exceptions import InvalidNotificationType
 
 
@@ -22,7 +21,7 @@ NotificationVoiceDriver.send = MagicMock(return_value=True)
 NotificationVoiceDriver.queue = MagicMock(return_value=True)
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def via(self, notifiable):
         return ["voice"]
 

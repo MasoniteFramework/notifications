@@ -1,6 +1,6 @@
 """Anonymous Notifiable mixin"""
 
-from .Notify import Notify
+from .Notification import Notification as NotificationService
 from .Notifiable import Notifiable
 
 
@@ -31,4 +31,4 @@ class AnonymousNotifiable(Notifiable):
     def notify(self, notification, dry=False, fail_silently=False):
         """Send the given notification."""
         from wsgi import container
-        return Notify(container).send(self, notification, self._routes, dry, fail_silently)
+        return NotificationService(container).send(self, notification, self._routes, dry, fail_silently)

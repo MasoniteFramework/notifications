@@ -1,10 +1,10 @@
 """A {{ class }} Notification class."""
 
-from masonite.notifications import Notification
+from masonite.notifications import NotificationFacade
 from masonite.notifications.components import MailComponent
 
 
-class {{ class }}(Notification):
+class {{ class }}(NotificationFacade):
     """{{ class }} Notification."""
 
     def to_mail(self, notifiable):

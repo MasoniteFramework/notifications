@@ -7,7 +7,7 @@ from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
 from .UserTestCase import UserTestCase
-from src.masonite.notifications import Notification
+from src.masonite.notifications import NotificationFacade
 from src.masonite.notifications.components import (
     MailComponent,
     SlackComponent,
@@ -25,7 +25,7 @@ from src.masonite.notifications.exceptions import (
 webhook_url = "https://hooks.slack.com/services/X/Y"
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -79,7 +79,7 @@ class TestNotifyHandler(UserTestCase):
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_sending_dry_notification_on_notification_class(self, mock_stderr):
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 return MailComponent().subject("Welcome")
 
@@ -97,7 +97,7 @@ class TestNotifyHandler(UserTestCase):
         self.assertEqual("", mock_stderr.getvalue())
 
     def test_sending_notification_failing_silently_on_notification_class(self):
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 raise Exception("Mock exception when sending")
 
@@ -109,7 +109,7 @@ class TestNotifyHandler(UserTestCase):
         # no exception raised
 
     def test_sending_fail_silently_notification_on_notification_interface(self):
-        class FailingNotification(Notification):
+        class FailingNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 return Exception("Mock test error")
 
@@ -121,7 +121,7 @@ class TestNotifyHandler(UserTestCase):
         # no exception raised
 
     def test_invalid_notification_driver_in_via_raises_error(self):
-        class FailingNotification(Notification):
+        class FailingNotification(NotificationFacade):
             def via(self, notifiable):
                 return ["incorrect_driver"]
 
@@ -134,7 +134,7 @@ class TestNotifyHandler(UserTestCase):
         )
 
     def test_that_empty_via_raises_an_error(self):
-        class FailingNotification(Notification):
+        class FailingNotification(NotificationFacade):
             def via(self, notifiable):
                 return []
 
@@ -147,7 +147,7 @@ class TestNotifyHandler(UserTestCase):
         )
 
     def test_that_channels_can_be_overriden_at_send(self):
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 return "mail"
 
@@ -172,7 +172,7 @@ class TestNotifyHandler(UserTestCase):
         NotificationMailDriver.send = mail_send_backup
 
     def test_that_channels_can_be_overriden_at_send_with_notification_interface(self):
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 return "mail"
 
@@ -204,7 +204,7 @@ class TestNotifyHandler(UserTestCase):
         # as all requests are mocked unmock the one for Vonage
         responses.add_passthru("https://rest.nexmo.com/sms/json")
 
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 return MailComponent().subject("Welcome")
 

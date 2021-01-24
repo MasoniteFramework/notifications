@@ -6,7 +6,7 @@ from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
 from masoniteorm.models import Model
-from src.masonite.notifications import Notifiable, Notification, Notify
+from src.masonite.notifications import Notifiable, NotificationFacade, Notification
 from src.masonite.notifications.drivers import NotificationBroadcastDriver
 from src.masonite.notifications.exceptions import BroadcastOnNotImplemented
 
@@ -21,7 +21,7 @@ def to_broadcast(self, notifiable):
     return {"data": "Welcome {0}!".format(notifiable.name)}
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_broadcast(self, notifiable):
         return to_broadcast(self, notifiable)
 
@@ -34,7 +34,7 @@ class TestBroadcastNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         self.container.bind("NotificationBroadcastDriver", NotificationBroadcastDriver)
         # tests are made with Pusher driver
         self.container.bind("BroadcastPusherDriver", BroadcastPusherDriver)

@@ -3,14 +3,13 @@ import unittest
 import unittest.mock
 from masonite.testing import TestCase
 from masoniteorm.models import Model
-from masoniteorm.relationships import morph_to
 
-from src.masonite.notifications import Notifiable, Notification, Notify
+from src.masonite.notifications import Notifiable, Notification, NotificationFacade
 from src.masonite.notifications.components import MailComponent
 from src.masonite.notifications.exceptions import NotificationRouteNotImplemented
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_mail(self, notifiable):
         return (
             MailComponent()
@@ -34,7 +33,7 @@ class User(Model, Notifiable):
 class TestNotifiable(TestCase):
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
 
     def setUpFactories(self):
         User.create({"name": "Joe", "email": "user@example.com", "password": "secret"})
@@ -82,7 +81,7 @@ class TestNotifiable(TestCase):
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_fail_silently_on_notifiable_notify_method(self, mock_stderr):
-        class FailingNotification(Notification):
+        class FailingNotification(NotificationFacade):
             def to_mail(self, notifiable):
                 raise Exception("Mock exception when sending")
 

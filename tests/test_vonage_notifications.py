@@ -3,7 +3,7 @@ from unittest.mock import patch
 from masonite.testing import TestCase
 from masoniteorm.models import Model
 
-from src.masonite.notifications import Notifiable, Notification, Notify
+from src.masonite.notifications import Notifiable, Notification, NotificationFacade
 from src.masonite.notifications.components import VonageComponent
 from src.masonite.notifications.exceptions import VonageInvalidMessage, VonageAPIError
 
@@ -21,7 +21,7 @@ def to_vonage(self, notifiable):
     return VonageComponent().text("Welcome!").send_from("123456")
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_vonage(self, notifiable):
         return to_vonage(self, notifiable)
 
@@ -47,7 +47,7 @@ class TestVonageNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # reset objects to default between tests
         WelcomeNotification.to_vonage = to_vonage
 

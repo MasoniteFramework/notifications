@@ -1,15 +1,13 @@
-import io
-import sys
 import unittest
 import unittest.mock
 from masonite.testing import TestCase
 
-from src.masonite.notifications import Notification, Notify
+from src.masonite.notifications import NotificationFacade, Notification
 from src.masonite.notifications.components import MailComponent
 from src.masonite.notifications.AnonymousNotifiable import AnonymousNotifiable
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -30,7 +28,7 @@ class TestAnonymousNotifiable(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         self.anon_notifiable = AnonymousNotifiable()
 
     def test_one_routing(self):

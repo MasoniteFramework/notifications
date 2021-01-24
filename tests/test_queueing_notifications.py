@@ -11,7 +11,7 @@ from masonite.app import App
 from masonite.environment import LoadEnvironment
 
 from src.masonite.notifications.drivers import NotificationBroadcastDriver
-from src.masonite.notifications import Notify
+from src.masonite.notifications import Notification
 from src.masonite.notifications.components import (
     MailComponent,
     SlackComponent,
@@ -57,7 +57,7 @@ class QueueableVonageNotification(VonageNotification, ShouldQueue):
 class TestQueueingMailNotifications(unittest.TestCase):
     def setUp(self):
         self.app = App()
-        self.notification = Notify(self.app)
+        self.notification = Notification(self.app)
         # configure queueing for tests
         self.app.bind("QueueAsyncDriver", QueueAsyncDriver)
         self.app.bind("Container", self.app)
@@ -78,7 +78,7 @@ class TestQueueingBroadcastNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # configure queueing for tests
         self.container.bind("QueueAsyncDriver", QueueAsyncDriver)
         self.container.bind("Container", self.container)
@@ -100,7 +100,7 @@ class TestQueueingSlackNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # configure queueing for tests
         self.container.bind("QueueAsyncDriver", QueueAsyncDriver)
         self.container.bind("Container", self.container)
@@ -120,7 +120,7 @@ class TestQueueingVonageNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # configure queueing for tests
         # self.container.bind("QueueAsyncDriver", QueueAsyncDriver)
         # self.container.bind("Container", self.container)

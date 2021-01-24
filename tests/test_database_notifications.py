@@ -8,7 +8,7 @@ from masoniteorm.models import Model
 from src.masonite.notifications import (
     Notifiable,
     Notification,
-    Notify,
+    NotificationFacade,
     DatabaseNotification,
 )
 from src.masonite.notifications.drivers import NotificationDatabaseDriver
@@ -28,7 +28,7 @@ def to_database(self, notifiable):
     return {"data": "Welcome {0}!".format(notifiable.name)}
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_database(self, notifiable):
         return to_database(self, notifiable)
 
@@ -51,7 +51,7 @@ class TestDatabaseNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         self.container.bind("NotificationDatabaseDriver", NotificationDatabaseDriver)
         self.database_driver = self.container.make("NotificationDatabaseDriver")
         # reset objects to default between tests

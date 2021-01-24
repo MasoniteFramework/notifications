@@ -1,7 +1,7 @@
 from masonite.testing import TestCase
 
 from masoniteorm.models import Model
-from src.masonite.notifications import Notify, Notification, Notifiable
+from src.masonite.notifications import NotificationFacade, Notification, Notifiable
 from src.masonite.notifications.components import MailComponent
 
 
@@ -11,7 +11,7 @@ class User(Model, Notifiable):
     __fillable__ = ["name", "email", "password"]
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_mail(self, notifiable):
         return (
             MailComponent()
@@ -28,7 +28,7 @@ class UserTestCase(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
 
     def setUpFactories(self):
         User.create({"name": "Joe", "email": "user@example.com", "password": "secret"})

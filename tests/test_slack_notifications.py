@@ -6,7 +6,7 @@ from masonite import env
 from masoniteorm.models import Model
 from slackblocks import DividerBlock, HeaderBlock
 
-from src.masonite.notifications import Notifiable, Notification, Notify
+from src.masonite.notifications import Notifiable, Notification, NotificationFacade
 from src.masonite.notifications.components import SlackComponent
 from src.masonite.notifications.exceptions import (
     NotificationFormatError,
@@ -32,7 +32,7 @@ def to_slack(self, notifiable):
     return SlackComponent().text("Welcome!")
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_slack(self, notifiable):
         return to_slack(self, notifiable)
 
@@ -45,7 +45,7 @@ class TestSlackNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # reset objects to default between tests
         WelcomeNotification.to_slack = to_slack
 
@@ -234,7 +234,7 @@ class TestSlackNotificationsFormatting(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # reset objects to default between tests
         WelcomeNotification.to_slack = to_slack
 

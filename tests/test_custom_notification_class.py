@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from .UserTestCase import UserTestCase
-from src.masonite.notifications import Notification, NotificationContract
+from src.masonite.notifications import Notification, NotificationContract, NotificationFacade
 from src.masonite.notifications.components import MailComponent
 from src.masonite.notifications.exceptions import InvalidNotificationType
 
@@ -21,7 +21,7 @@ NotificationVoiceClass.send = MagicMock(return_value=True)
 NotificationVoiceClass.queue = MagicMock(return_value=True)
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def via(self, notifiable):
         return [NotificationVoiceClass]
 
@@ -59,7 +59,7 @@ class TestCustomClass(UserTestCase):
         class NotificationCustomClass(NotificationContract):
             pass
 
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def via(self, notifiable):
                 return [NotificationCustomClass]
 
@@ -72,7 +72,7 @@ class TestCustomClass(UserTestCase):
             def send(self, notifiable, notification):
                 pass
 
-        class WelcomeNotification(Notification):
+        class WelcomeNotification(NotificationFacade):
             def via(self, notifiable):
                 return [NotificationCustomClass]
 

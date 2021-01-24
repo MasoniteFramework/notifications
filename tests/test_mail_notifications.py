@@ -5,7 +5,7 @@ from masonite.testing import TestCase
 from masonite.drivers import Mailable
 
 from masoniteorm.models import Model
-from src.masonite.notifications import Notifiable, Notification, Notify
+from src.masonite.notifications import Notifiable, Notification, NotificationFacade
 from src.masonite.notifications.components import MailComponent
 
 
@@ -32,7 +32,7 @@ def to_mail(self, notifiable):
     return WelcomeEmail(notifiable.name).to(notifiable.email)
 
 
-class WelcomeNotification(Notification):
+class WelcomeNotification(NotificationFacade):
     def to_mail(self, notifiable):
         return to_mail(self, notifiable)
 
@@ -40,7 +40,7 @@ class WelcomeNotification(Notification):
         return ["mail"]
 
 
-class CustomNotification(Notification):
+class CustomNotification(NotificationFacade):
     def to_mail(self, notifiable):
         return MailComponent().subject("Welcome!")
 
@@ -53,7 +53,7 @@ class TestMailNotifications(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.notification = Notify(self.container)
+        self.notification = Notification(self.container)
         # reset objects to default between tests
         WelcomeNotification.to_mail = to_mail
 
