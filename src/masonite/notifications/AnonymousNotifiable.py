@@ -1,6 +1,6 @@
 """Anonymous Notifiable mixin"""
 
-from src.masonite.notifications.Notify import Notify
+from .Notify import Notify
 from .Notifiable import Notifiable
 
 

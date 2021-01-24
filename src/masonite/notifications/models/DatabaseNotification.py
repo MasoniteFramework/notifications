@@ -1,7 +1,7 @@
 """DatabaseNotification Model."""
+import pendulum
 from masoniteorm.relationships import morph_to
 from masoniteorm.models import Model
-import pendulum
 
 
 class DatabaseNotification(Model):

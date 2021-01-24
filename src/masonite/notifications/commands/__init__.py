@@ -1,2 +1,3 @@
 from .NotificationCommand import NotificationCommand
 from .NotificationTableCommand import NotificationTableCommand
+from .NotificationInstallCommand import NotificationInstallCommand

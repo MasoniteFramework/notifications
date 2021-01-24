@@ -1,7 +1,7 @@
 """Notifiable mixin"""
 from masoniteorm.relationships import has_many
 
-from src.masonite.notifications.models.DatabaseNotification import DatabaseNotification
+from .models.DatabaseNotification import DatabaseNotification
 from .Notify import Notify
 from .exceptions import NotificationRouteNotImplemented
 

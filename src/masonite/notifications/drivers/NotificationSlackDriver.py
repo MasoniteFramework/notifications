@@ -1,9 +1,9 @@
 """Slack driver Class"""
-from masonite.managers.QueueManager import Queue
 import requests
 from masonite.app import App
 from masonite.drivers import BaseDriver
 from masonite.helpers import config
+from masonite.managers.QueueManager import Queue
 
 from ..exceptions import (
     SlackChannelNotFound,

@@ -9,12 +9,12 @@ setup(
     package_dir={'': 'src'},
     packages=[
         'masonite.notifications',
-        'masonite.notifications.components',
-        'masonite.notifications.drivers',
-        'masonite.notifications.snippets',
-        'masonite.notifications.providers',
         'masonite.notifications.commands',
+        'masonite.notifications.components',
+        'masonite.notifications.config',
+        'masonite.notifications.drivers',
         'masonite.notifications.models',
+        'masonite.notifications.providers',
     ],
     version='3.0.0',
     install_requires=[

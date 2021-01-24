@@ -4,7 +4,7 @@ from .BaseComponent import BaseComponent
 
 class MailComponent(BaseComponent):
     template = ""
-    template_prefix = "/src/masonite/notifications"
+    template_prefix = "/masonite/notifications"
 
     def __init__(self):
         super().__init__()

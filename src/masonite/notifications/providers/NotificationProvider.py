@@ -10,7 +10,7 @@ from ..drivers import (
     NotificationVonageDriver,
 )
 from ..NotificationManager import NotificationManager
-from ..commands import NotificationCommand, NotificationTableCommand
+from ..commands import NotificationCommand, NotificationTableCommand, NotificationInstallCommand
 
 
 class NotificationProvider(ServiceProvider):
@@ -19,6 +19,7 @@ class NotificationProvider(ServiceProvider):
     wsgi = False
 
     def register(self):
+        self.app.bind("NotificationInstallCommand", NotificationInstallCommand())
         self.app.bind("NotificationCommand", NotificationCommand())
         self.app.bind("NotificationTableCommand", NotificationTableCommand())
 

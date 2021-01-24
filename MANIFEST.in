@@ -1,1 +1,2 @@
-include notifications/snippets/mail/*
+graft src/masonite/notifications/snippets/
+graft src/masonite/notifications/migrations/

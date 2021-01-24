@@ -3,6 +3,7 @@ import json
 from masonite.app import App
 from masonite import Queue
 from masonite.drivers import BaseDriver
+
 from ..NotificationContract import NotificationContract
 from ..models import DatabaseNotification
 
@@ -20,7 +21,9 @@ class NotificationDatabaseDriver(BaseDriver, NotificationContract):
     def queue(self, notifiable, notification):
         """Used to queue the database notification creation."""
         model_data = self.build_payload(notifiable, notification)
-        return self.app.make(Queue).push(DatabaseNotification.create, args=(model_data,))
+        return self.app.make(Queue).push(
+            DatabaseNotification.create, args=(model_data,)
+        )
 
     def serialize_data(self, data):
         return json.dumps(data)
