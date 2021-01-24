@@ -49,7 +49,6 @@ class TestNotifiable(TestCase):
         self.assertEqual(0, user.read_notifications.count())
         self.assertEqual(0, user.unread_notifications.count())
         self.assertTrue(callable(user.notify))
-        self.assertTrue(callable(user.notify_now))
 
     @unittest.mock.patch("sys.stderr", new_callable=io.StringIO)
     def test_send_notification_to_user_through_notifiable_mixin(self, mock_stderr):

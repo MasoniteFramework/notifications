@@ -1,5 +1,6 @@
 """Slack driver Class"""
 import json
+from masonite.managers.QueueManager import Queue
 import requests
 from masonite.app import App
 from masonite.drivers import BaseDriver
@@ -33,17 +34,23 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
 
     def send(self, notifiable, notification):
         """Used to send the notification to slack."""
+        method, args = self._prepare_slack_message(notifiable, notification)
+        return method(*args)
+
+    def queue(self, notifiable, notification):
+        """Used to queue the notification to be sent to slack."""
+        method, args = self._prepare_slack_message(notifiable, notification)
+        return self.app.make(Queue).push(method, args=args)
+
+    def _prepare_slack_message(self, notifiable, notification):
+        """Prepare slack message to be sent."""
         data = self.get_data("slack", notifiable, notification)
         recipients = self.get_recipients(notifiable, notification)
         if self.sending_mode == self.WEBHOOK_MODE:
-            self.send_via_webhook(data, recipients)
+            send_method = self.send_via_webhook
         else:
-            self.send_via_api(data, recipients)
-
-    def queue(self, notifiable, notification):
-        """Used to queue the notification to be send to slack."""
-        # TODO:
-        pass
+            send_method = self.send_via_api
+        return send_method, (data, recipients)
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
@@ -91,8 +98,8 @@ class NotificationSlackDriver(BaseDriver, NotificationContract):
                 self._handle_webhook_error(response, payload)
 
     def send_via_api(self, payload, channels):
-        # TODO: fetch token, from env ?
-        # TODO: implement this one
+        raise NotImplementedError("""Sending slack notifications with API is not implemented.
+        Please set sending_mode to WEBHOOK_MODE.""")
         # data =
         for channel in channels:
             pass

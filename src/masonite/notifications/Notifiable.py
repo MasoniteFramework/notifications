@@ -13,14 +13,6 @@ class Notifiable(object):
 
         return Notify(container).send(self, notification, channels, dry, fail_silently)
 
-    def notify_now(self, notification, channels=[], dry=False, fail_silently=False):
-        """Send the given notification immediately."""
-        from wsgi import container
-
-        return Notify(container).send_now(
-            self, notification, channels, dry, fail_silently
-        )
-
     def route_notification_for(self, channel, notification=None):
         """Get the notification routing information for the given channel."""
         # check if routing has been specified on the model

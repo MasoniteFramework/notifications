@@ -1,8 +1,7 @@
 """Broadcast driver Class."""
 from masonite.app import App
-from masonite import Queue, Broadcast
+from masonite import Queue
 from masonite.helpers import config
-from masonite.queues import ShouldQueue
 from masonite.drivers import BaseDriver
 
 from ..NotificationContract import NotificationContract
@@ -31,16 +30,21 @@ class NotificationBroadcastDriver(BaseDriver, NotificationContract):
 
     def send(self, notifiable, notification):
         """Used to broadcast a notification."""
-        data = self.get_data("broadcast", notifiable, notification)
-        driver_instance = self.get_broadcast_driver()
-        channels = self.broadcast_on(notifiable, notification)
+        channels, data, driver = self._prepare_message_to_broadcast(notifiable, notification)
         for channel in channels:
-            driver_instance.channel(channel, data)
+            driver.channel(channel, data)
 
     def queue(self, notifiable, notification):
         """Used to queue the notification to be broadcasted."""
-        # TODO:
-        pass
+        channels, data, driver = self._prepare_message_to_broadcast(notifiable, notification)
+        for channel in channels:
+            self.app.make(Queue).push(driver.channel, args=(channel, data))
+
+    def _prepare_message_to_broadcast(self, notifiable, notification):
+        data = self.get_data("broadcast", notifiable, notification)
+        driver_instance = self.get_broadcast_driver()
+        channels = self.broadcast_on(notifiable, notification)
+        return channels, data, driver_instance
 
     def get_broadcast_driver(self):
         """Shortcut method to get given broadcast driver instance."""

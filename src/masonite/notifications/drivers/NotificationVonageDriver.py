@@ -2,6 +2,7 @@
 from masonite.drivers import BaseDriver
 from masonite.app import App
 from masonite.helpers import config
+from masonite import Queue
 
 from ..NotificationContract import NotificationContract
 from ..exceptions import VonageInvalidMessage, VonageAPIError
@@ -25,12 +26,8 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
         self._sms_from = config("notifications.vonage.sms_from") or None
 
     def send(self, notifiable, notification):
-        """Used to send the SMS and run the logic for sending SMS."""
-        data = self.get_data("vonage", notifiable, notification)
-        recipients = self.get_recipients(notifiable, notification)
-        from vonage.sms import Sms
-
-        sms = Sms(self._client)
+        """Used to send the SMS."""
+        data, recipients, sms = self._prepare_sms(notifiable, notification)
         responses = []
         for recipient in recipients:
             payload = self.build_payload(data, recipient)
@@ -41,8 +38,19 @@ class NotificationVonageDriver(BaseDriver, NotificationContract):
 
     def queue(self, notifiable, notification):
         """Used to queue the SMS notification to be send."""
-        # TODO:
-        pass
+        data, recipients, sms = self._prepare_sms(notifiable, notification)
+        for recipient in recipients:
+            payload = self.build_payload(data, recipient)
+            self.app.make(Queue).push(sms.send_message, args=(payload,))
+
+    def _prepare_sms(self, notifiable, notification):
+        """Prepare SMS and list of recipients."""
+        data = self.get_data("vonage", notifiable, notification)
+        recipients = self.get_recipients(notifiable, notification)
+        from vonage.sms import Sms
+
+        sms = Sms(self._client)
+        return data, recipients, sms
 
     def get_recipients(self, notifiable, notification):
         """Get recipients which can be defined through notifiable route method.
