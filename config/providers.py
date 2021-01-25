@@ -12,7 +12,7 @@ from masonite.providers import (
     ViewProvider,
 )
 
-from src.masonite.notifications.providers import NotificationProvider
+from src.masonite.notifications import NotificationProvider
 
 """
 |--------------------------------------------------------------------------

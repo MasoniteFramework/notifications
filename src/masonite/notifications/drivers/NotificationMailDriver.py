@@ -9,7 +9,6 @@ from ..NotificationContract import NotificationContract
 
 
 class NotificationMailDriver(BaseDriver, NotificationContract):
-    _driver = None
 
     def __init__(self, app: App):
         """Mail Driver Constructor.
