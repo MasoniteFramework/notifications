@@ -1,21 +1,38 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 setup(
     name='masonite-notifications',
+    package_dir={'': 'src'},
     packages=[
-        'notifications',
-        'notifications.components',
-        'notifications.snippets',
-        'notifications.providers',
-        'notifications.commands',
+        'masonite.notifications',
+        'masonite.notifications.commands',
+        'masonite.notifications.components',
+        'masonite.notifications.config',
+        'masonite.notifications.drivers',
+        'masonite.notifications.models',
+        'masonite.notifications.providers',
     ],
-    version='1.0.1',
-    install_requires=[],
-    description='The core for the Masonite framework',
+    version='3.0.0',
+    install_requires=[
+        "masonite>=3.0<4",
+    ],
+    description='Masonite Notifications Package',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author='Joseph Mancuso',
-    author_email='idmann509@gmail.com',
+    author_email='joe@masoniteproject.com',
     url='https://github.com/MasoniteFramework/notifications',
-    keywords=['python web framework', 'python3', 'masonite'],
+    license="MIT",
+    keywords="Masonite, Python",
     classifiers=[],
     include_package_data=True,
+    extras_require={
+        "test": ["coverage", "pytest", "pytest-cov", "coveralls", "responses"],
+        "dev": ["black", "flake8", "twine>=1.5.0", "wheel"],
+        "services": ["pusher", "ably", "vonage", "slackblocks"]
+    },
 )

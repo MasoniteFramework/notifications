@@ -1,0 +1,19 @@
+"""A {{ class }} Notification class."""
+
+from masonite.notifications import NotificationFacade
+from masonite.notifications.components import MailComponent
+
+
+class {{ class }}(NotificationFacade):
+    """{{ class }} Notification."""
+
+    def to_mail(self, notifiable):
+        return MailComponent().subject('New email subject') \
+            .heading('This is a new email !') \
+
+    def to_database(self, notifiable):
+        pass
+
+    def via(self, notifiable):
+        """Defines the notification's delivery channels."""
+        return ["mail"]

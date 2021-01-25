@@ -1,1 +1,2 @@
-masonite>=2.1.0
+masonite>=3.0<4
+slackblocks==0.2.3
