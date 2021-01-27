@@ -2,7 +2,6 @@
 from masoniteorm.relationships import has_many
 
 from .models.DatabaseNotification import DatabaseNotification
-from .Notification import Notification as NotificationService
 from .exceptions import NotificationRouteNotImplemented
 
 
@@ -10,8 +9,7 @@ class Notifiable(object):
     def notify(self, notification, channels=[], dry=False, fail_silently=False):
         """Send the given notification."""
         from wsgi import container
-
-        return NotificationService(container).send(self, notification, channels, dry, fail_silently)
+        return container.make("Notification").send(self, notification, channels, dry, fail_silently)
 
     def route_notification_for(self, channel, notification=None):
         """Get the notification routing information for the given channel."""

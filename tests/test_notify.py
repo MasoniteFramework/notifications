@@ -7,7 +7,7 @@ from masonite.drivers import BroadcastPusherDriver
 from masonite.managers import BroadcastManager
 
 from .UserTestCase import UserTestCase
-from src.masonite.notifications import NotificationFacade
+from src.masonite.notifications import Notification, NotificationFacade
 from src.masonite.notifications.components import (
     MailComponent,
     SlackComponent,
@@ -234,3 +234,44 @@ class TestNotifyHandler(UserTestCase):
         self.assertEqual(1, user.notifications.count())
         # check slack driver
         self.assertTrue(responses.assert_call_count(webhook_url, 1))
+
+    # def test_fake(self):
+    #     user_email = "john.doe@masonite.com"
+    #     new_notif = self.notification.fake()
+    #     new_notif.route("mail", user_email).notify(WelcomeNotification("John"))
+
+    def test_with_anonymous_users(self):
+        user_email = "john.doe@masonite.com"
+        Notification.fake()
+        Notification.assertNothingSent()
+        Notification.route("mail", user_email).notify(WelcomeNotification("John"))
+        Notification.assertSentTo(user_email, WelcomeNotification)
+        Notification.restore()
+
+    def test_with_notifiable(self):
+        Notification.fake()
+        Notification.assertNothingSent()
+        user = self.user()
+        user.notify(WelcomeNotification("John"))
+        Notification.assertSentTo(
+            user,
+            WelcomeNotification,
+            lambda notifiable, notif, channels: notif.name == "John"
+        )
+        Notification.restore()
+
+    def test_notifications_for_helper(self):
+        Notification.fake()
+        user = self.user()
+        user.notify(WelcomeNotification("2"))
+        user.notify(WelcomeNotification("1"))
+        user.notify(SlackAndMailNotification(3))
+
+        assert len(Notification.notificationsFor(user, WelcomeNotification)) == 2
+        assert len(Notification.notificationsFor(user, SlackAndMailNotification)) == 1
+        Notification.route("mail", "test@email.com").notify(WelcomeNotification("John"))
+        assert len(Notification.notificationsFor("test@email.com", WelcomeNotification)) == 1
+
+        Notification.assertSentTo(user, WelcomeNotification, count=2)
+        Notification.assertSentTo(user, SlackAndMailNotification)
+        Notification.restore()

@@ -7,13 +7,19 @@ from masoniteorm.models import Model
 
 from .NotificationContract import NotificationContract
 from .exceptions import InvalidNotificationType, NotificationChannelsNotDefined
+from .Mockable import MockableService
 
 
-class Notification(object):
+class Notification(MockableService):
     """Notification handler which handle sending/queuing notifications anonymously
     or to notifiables through different channels."""
 
-    called_notifications = []
+    __service__ = "Notification"
+
+    @classmethod
+    def get_mock_class(cls):
+        from .NotificationTester import NotificationTester
+        return NotificationTester
 
     def __init__(self, container: App):
         """Notification constructor.
@@ -131,8 +137,29 @@ class Notification(object):
 
         return _channels
 
-    def route(self, channel, route):
+    # def route(self, channel, route):
+    #     """Begin sending a notification to an anonymous notifiable."""
+    #     from .AnonymousNotifiable import AnonymousNotifiable
+
+    #     return AnonymousNotifiable().route(channel, route)
+    @staticmethod
+    def route(channel, route):
         """Begin sending a notification to an anonymous notifiable."""
         from .AnonymousNotifiable import AnonymousNotifiable
 
         return AnonymousNotifiable().route(channel, route)
+
+    # @classmethod
+    # def fake(cls):
+    #     from .NotificationTester import NotificationTester
+    #     from wsgi import container
+
+    #     tester = NotificationTester(container)
+    #     container.bind("Notification", tester)
+    #     return tester
+
+    # @classmethod
+    # def restore(cls):
+    #     from wsgi import container
+
+    #     return container.bind("Notification", cls(container))
